@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美股每日总结</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'MiSans-Bold';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'MiSans-Medium';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'MiSans-Regular';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'MiSans-Regular', sans-serif;
+            background-color: rgb(255, 255, 255);
+            color: rgb(0, 17, 44);
+            width: 390px;
+            margin: 0 auto;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 25px 0 15px;
+            position: relative;
+            border-bottom: 1px solid rgba(0, 17, 44, 0.1);
+        }
+        
+        .header-icon {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            color: rgb(12, 191, 83);
+            font-size: 24px;
+        }
+        
+        .title {
+            font-family: 'MiSans-Bold', sans-serif;
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        
+        .update-time {
+            font-size: 12px;
+            color: rgba(0, 17, 44, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .section-title {
+            font-family: 'MiSans-Medium', sans-serif;
+            font-size: 18px;
+            margin: 25px 0 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-icon {
+            color: rgb(12, 191, 83);
+            font-size: 20px;
+        }
+        
+        .index-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .index-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        
+        .index-card {
+            flex: 1;
+            background-color: rgba(0, 17, 44, 0.02);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 17, 44, 0.05);
+        }
+        
+        .index-name {
+            font-family: 'MiSans-Medium', sans-serif;
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: rgba(0, 17, 44, 0.8);
+        }
+        
+        .index-value {
+            font-family: 'MiSans-Bold', sans-serif;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .index-change {
+            font-size: 16px;
+            font-family: 'MiSans-Medium', sans-serif;
+        }
+        
+        .increase {
+            color: rgb(12, 191, 83);
+        }
+        
+        .decrease {
+            color: rgb(255, 59, 48);
+        }
+        
+        .analysis {
+            background-color: rgba(0, 17, 44, 0.02);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 17, 44, 0.05);
+            line-height: 1.6;
+        }
+        
+        .analysis-title {
+            font-family: 'MiSans-Medium', sans-serif;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: rgb(0, 17, 44);
+        }
+        
+        .analysis-content {
+            font-size: 14px;
+            color: rgba(0, 17, 44, 0.8);
+            margin-bottom: 10px;
+        }
+        
+        .analysis-content:last-child {
+            margin-bottom: 0;
+        }
+        
+        .highlight {
+            color: rgb(12, 191, 83);
+            font-weight: 500;
+        }
+        
+        .events-list {
+            margin-top: 10px;
+        }
+        
+        .event-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 17, 44, 0.05);
+            border-left: 3px solid rgb(12, 191, 83);
+            transition: transform 0.2s;
+        }
+        
+        .event-card:hover {
+            transform: translateX(5px);
+        }
+        
+        .event-title {
+            font-family: 'MiSans-Medium', sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .event-dot {
+            color: rgb(12, 191, 83);
+            font-size: 18px;
+            margin-top: 2px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px 0 20px;
+            font-size: 12px;
+            color: rgba(0, 17, 44, 0.5);
+        }
+        
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(0, 17, 44, 0.1), transparent);
+            margin: 30px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: rgba(0, 17, 44, 0.6);
+        }
+
+        .error {
+            background-color: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            color: rgb(255, 59, 48);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgb(12, 191, 83);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(12, 191, 83, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .admin-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 17, 44, 0.8);
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+
+        .admin-link:hover {
+            background-color: rgb(0, 17, 44);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 0 10px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 17, 44, 0.2);
+            border-radius: 10px;
+            font-family: 'MiSans-Medium', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: rgba(0, 17, 44, 0.02);
+            color: rgb(0, 17, 44);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(0, 17, 44, 0.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 17, 44, 0.1);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        .today-btn {
+            background-color: rgb(12, 191, 83);
+            color: white;
+            border-color: rgb(12, 191, 83);
+        }
+
+        .today-btn:hover {
+            background-color: rgb(10, 171, 74);
+            border-color: rgb(10, 171, 74);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .nav-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .screenshot-section {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .screenshot-btn {
+            padding: 12px 25px;
+            background-color: rgb(255, 149, 0);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'MiSans-Medium', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 auto;
+            box-shadow: 0 2px 8px rgba(255, 149, 0, 0.3);
+        }
+
+        .screenshot-btn:hover {
+            background-color: rgb(230, 134, 0);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
+        }
+
+        .screenshot-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 截图时隐藏的元素 */
+        .screenshot-mode .navigation,
+        .screenshot-mode .screenshot-section,
+        .screenshot-mode .refresh-btn {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="container">
+        <div class="header">
+            <i class="ri-line-chart-fill header-icon"></i>
+            <h1 class="title" id="pageTitle">美股总结</h1>
+            <div class="update-time">
+                <i class="ri-time-line"></i>
+                <span id="updateTime">正在加载...</span>
+            </div>
+        </div>
+        
+        <div class="section-title">
+            <i class="ri-stock-line section-icon"></i>
+            <span>指数行情</span>
+        </div>
+        
+        <div id="indexCards" class="index-cards">
+            <div class="loading">
+                <i class="ri-loader-4-line"></i> 正在加载数据...
+            </div>
+        </div>
+        
+        <div class="section-title">
+            <i class="ri-file-chart-line section-icon"></i>
+            <span>市场分析</span>
+        </div>
+        
+        <div id="analysisSection" class="analysis">
+            <div class="loading">正在加载分析...</div>
+        </div>
+        
+        <div class="section-title">
+            <i class="ri-newspaper-line section-icon"></i>
+            <span>重要事件</span>
+        </div>
+        
+        <div id="eventsList" class="events-list">
+            <div class="loading">正在加载事件...</div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="navigation" id="navigationBar">
+            <button class="nav-btn" id="prevDay" onclick="loadPreviousDay()">
+                <i class="ri-arrow-left-line"></i>
+                前一天
+            </button>
+            <button class="nav-btn today-btn" onclick="loadTodayData()">
+                <i class="ri-calendar-line"></i>
+                今天
+            </button>
+            <button class="nav-btn" id="nextDay" onclick="loadNextDay()">
+                后一天
+                <i class="ri-arrow-right-line"></i>
+            </button>
+        </div>
+        
+        <div class="screenshot-section">
+            <button class="screenshot-btn" onclick="captureScreenshot()">
+                <i class="ri-camera-line"></i>
+                生成图片
+            </button>
+        </div>
+        
+        <div class="footer">
+            © 2025 美股行情每日总结 · 数据仅供参考
+        </div>
+    </div>
+
+    <button class="refresh-btn" id="refreshBtn" onclick="loadData()" title="刷新数据">
+        <i class="ri-refresh-line"></i>
+    </button>
+
+    <script>
+        let currentDate = '';
+
+        // 获取今天的日期
+        function getTodayDate() {
+            const today = new Date();
+            return today.toISOString().split('T')[0];
+        }
+
+        // 加载指定日期的数据
+        async function loadDataForDate(date) {
+            try {
+                currentDate = date;
+                const response = await fetch(`/api/data/${date}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                // 更新页面内容
+                updateUpdateTime(data.date || date);
+                updateIndexCards(data.indices || []);
+                updateAnalysis(data.marketAnalysis || []);
+                updateEvents(data.importantEvents || []);
+                
+                // 更新导航按钮状态
+                updateNavigationButtons();
+                
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                showError('数据加载失败，请稍后重试');
+            }
+        }
+
+        // 日期计算辅助函数
+        function addDays(dateString, days) {
+            const date = new Date(dateString);
+            date.setDate(date.getDate() + days);
+            return date.toISOString().split('T')[0];
+        }
+
+        // 加载前一天数据
+        function loadPreviousDay() {
+            if (currentDate) {
+                const prevDate = addDays(currentDate, -1);
+                loadDataForDate(prevDate);
+            }
+        }
+
+        // 加载后一天数据
+        function loadNextDay() {
+            if (currentDate) {
+                const nextDate = addDays(currentDate, 1);
+                const today = getTodayDate();
+                // 不允许查看未来日期
+                if (nextDate <= today) {
+                    loadDataForDate(nextDate);
+                }
+            }
+        }
+
+        // 加载今天的数据
+        function loadTodayData() {
+            const today = getTodayDate();
+            loadDataForDate(today);
+        }
+
+        // 更新导航按钮状态
+        function updateNavigationButtons() {
+            const today = getTodayDate();
+            const nextBtn = document.getElementById('nextDay');
+            
+            if (currentDate) {
+                const nextDate = addDays(currentDate, 1);
+                // 如果下一天是未来日期，禁用后一天按钮
+                nextBtn.disabled = nextDate > today;
+            }
+        }
+
+        // 加载数据函数（默认今天）
+        async function loadData() {
+            const today = getTodayDate();
+            await loadDataForDate(today);
+        }
+
+        function updateUpdateTime(date) {
+            document.getElementById('updateTime').textContent = `北京时间 8:00 更新`;
+            // 同时更新页面标题
+            document.getElementById('pageTitle').textContent = `美股 ${date} 总结`;
+        }
+
+        function updateIndexCards(indices) {
+            const container = document.getElementById('indexCards');
+            if (indices.length === 0) {
+                container.innerHTML = '<div class="error">暂无指数数据</div>';
+                return;
+            }
+
+            // 每行最多显示2个指数卡片
+            let html = '';
+            for (let i = 0; i < indices.length; i += 2) {
+                html += '<div class="index-row">';
+                
+                for (let j = i; j < Math.min(i + 2, indices.length); j++) {
+                    const index = indices[j];
+                    // 根据changePercent判断涨跌
+                    const isPositive = index.changePercent && index.changePercent.includes('+');
+                    const trendClass = isPositive ? 'increase' : 'decrease';
+                    const trendIcon = isPositive ? 'ri-arrow-up-line' : 'ri-arrow-down-line';
+                    
+                    html += `
+                        <div class="index-card">
+                            <div class="index-name">${index.name}</div>
+                            <div class="index-value">${index.value}</div>
+                            <div class="index-change ${trendClass}">
+                                <i class="${trendIcon}"></i>
+                                ${index.changePercent}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function updateAnalysis(analysis) {
+            const container = document.getElementById('analysisSection');
+            if (!analysis || (Array.isArray(analysis) && analysis.length === 0)) {
+                container.innerHTML = '<div class="error">暂无市场分析数据</div>';
+                return;
+            }
+
+            let contentHtml = '';
+            if (Array.isArray(analysis)) {
+                contentHtml = analysis.map(paragraph => 
+                    `<p class="analysis-content">${paragraph}</p>`
+                ).join('');
+            } else {
+                contentHtml = `<p class="analysis-content">${analysis}</p>`;
+            }
+
+            container.innerHTML = `
+                ${contentHtml}
+            `;
+        }
+
+        function updateEvents(events) {
+            const container = document.getElementById('eventsList');
+            if (events.length === 0) {
+                container.innerHTML = '<div class="error">暂无重要事件</div>';
+                return;
+            }
+
+            const html = events.map(event => `
+                <div class="event-card">
+                    <div class="event-title">
+                        <span>${event}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        function showError(message) {
+            const errorHtml = `<div class="error">${message}</div>`;
+            document.getElementById('indexCards').innerHTML = errorHtml;
+            document.getElementById('analysisSection').innerHTML = errorHtml;
+            document.getElementById('eventsList').innerHTML = errorHtml;
+        }
+
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', loadData);
+
+        // 截图功能
+        async function captureScreenshot() {
+            try {
+                // 添加截图模式样式类
+                document.body.classList.add('screenshot-mode');
+                
+                // 等待样式应用
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // 获取容器元素
+                const container = document.querySelector('.container');
+                
+                // 配置html2canvas选项
+                const canvas = await html2canvas(container, {
+                    backgroundColor: '#ffffff',
+                    scale: 2, // 提高图片质量
+                    useCORS: true,
+                    allowTaint: true,
+                    width: container.offsetWidth,
+                    height: container.offsetHeight,
+                    scrollX: 0,
+                    scrollY: 0
+                });
+                
+                // 移除截图模式样式类
+                document.body.classList.remove('screenshot-mode');
+                
+                // 创建下载链接
+                const link = document.createElement('a');
+                link.download = `美股${currentDate}总结.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                
+                // 触发下载
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log('截图已保存');
+                
+            } catch (error) {
+                console.error('截图失败:', error);
+                alert('截图失败，请稍后重试');
+                // 确保移除截图模式样式类
+                document.body.classList.remove('screenshot-mode');
+            }
+        }
+
+        // 每5分钟自动刷新当前日期的数据
+        setInterval(() => {
+            if (currentDate) {
+                loadDataForDate(currentDate);
+            }
+        }, 5 * 60 * 1000);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,22 @@
+{
+  "name": "stock-daily",
+  "version": "1.0.0",
+  "description": "美股讯息网站 - 每日股市信息展示",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "cors": "^2.8.5",
+    "fs-extra": "^11.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["stock", "finance", "daily", "news"],
+  "author": "Your Name",
+  "license": "ISC"
+} 

@@ -426,9 +426,9 @@
         </div>
         
         <div class="screenshot-section">
-            <button class="screenshot-btn" onclick="captureScreenshot()">
+            <button class="screenshot-btn" onclick="captureScreenshot()" id="screenshotBtn">
                 <i class="ri-camera-line"></i>
-                生成图片
+                <span id="screenshotBtnText">生成图片</span>
             </button>
         </div>
         
@@ -616,7 +616,22 @@
         }
 
         // 页面加载时获取数据
-        document.addEventListener('DOMContentLoaded', loadData);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            updateScreenshotButtonText();
+        });
+
+        // 根据设备类型更新截图按钮文本
+        function updateScreenshotButtonText() {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const btnText = document.getElementById('screenshotBtnText');
+            
+            if (isMobile) {
+                btnText.textContent = '保存到相册';
+            } else {
+                btnText.textContent = '生成图片';
+            }
+        }
 
         // 截图功能
         async function captureScreenshot() {
@@ -645,17 +660,16 @@
                 // 移除截图模式样式类
                 document.body.classList.remove('screenshot-mode');
                 
-                // 创建下载链接
-                const link = document.createElement('a');
-                link.download = `美股${currentDate}总结.jpg`;
-                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                // 检测是否为移动设备
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                 
-                // 触发下载
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                console.log('截图已保存');
+                if (isMobile) {
+                    // 移动设备：尝试保存到相册
+                    await saveToPhotoLibrary(canvas);
+                } else {
+                    // 桌面设备：下载文件
+                    downloadImage(canvas);
+                }
                 
             } catch (error) {
                 console.error('截图失败:', error);
@@ -663,6 +677,51 @@
                 // 确保移除截图模式样式类
                 document.body.classList.remove('screenshot-mode');
             }
+        }
+
+        // 保存到相册（移动设备）
+        async function saveToPhotoLibrary(canvas) {
+            try {
+                // 将canvas转换为blob
+                const blob = await new Promise(resolve => {
+                    canvas.toBlob(resolve, 'image/jpeg', 0.9);
+                });
+
+                // 创建文件对象
+                const file = new File([blob], `美股${currentDate}总结.jpg`, { type: 'image/jpeg' });
+
+                // 检查是否支持Web Share API
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    // 使用Web Share API分享到相册
+                    await navigator.share({
+                        title: `美股${currentDate}总结`,
+                        text: '美股每日总结图片',
+                        files: [file]
+                    });
+                    alert('图片已分享，请选择保存到相册');
+                } else {
+                    // 回退到下载方式
+                    downloadImage(canvas);
+                }
+            } catch (error) {
+                console.error('保存到相册失败:', error);
+                // 回退到下载方式
+                downloadImage(canvas);
+            }
+        }
+
+        // 下载图片（桌面设备）
+        function downloadImage(canvas) {
+            const link = document.createElement('a');
+            link.download = `美股${currentDate}总结.jpg`;
+            link.href = canvas.toDataURL('image/jpeg', 0.9);
+            
+            // 触发下载
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            console.log('截图已保存');
         }
 
         // 每5分钟自动刷新当前日期的数据

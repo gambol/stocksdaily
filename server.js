@@ -13,8 +13,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 
 // 管理员账户（生产环境应该使用数据库）
 const ADMIN_CREDENTIALS = {
-    username: 'admin',
-    password: 'admin123' // 生产环境应该使用加密密码
+    username: 'briefAdmin',
+    password: 'Admin@898989' // 生产环境应该使用加密密码
 };
 
 // 存储验证码（生产环境应该使用Redis）

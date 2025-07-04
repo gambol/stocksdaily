@@ -25,6 +25,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
+// 专门处理 favicon.ico
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
+});
+
 // 确保data目录存在
 const dataDir = path.join(__dirname, 'data');
 fs.ensureDirSync(dataDir);

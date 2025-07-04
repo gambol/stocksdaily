@@ -254,23 +254,6 @@
             transform: scale(1.1);
         }
 
-        .admin-link {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: rgba(0, 17, 44, 0.8);
-            color: white;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            transition: background-color 0.2s;
-        }
-
-        .admin-link:hover {
-            background-color: rgb(0, 17, 44);
-        }
-
         .navigation {
             display: flex;
             justify-content: space-between;
@@ -403,11 +386,6 @@
     <button class="refresh-btn" id="refreshBtn" onclick="captureScreenshot()" title="生成图片">
         <i class="ri-camera-line"></i>
     </button>
-
-    <a href="/admin.html" class="admin-link" title="后台管理">
-        <i class="ri-settings-3-line"></i>
-        管理
-    </a>
 
     <script>
         let currentDate = '';

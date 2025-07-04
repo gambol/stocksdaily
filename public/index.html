@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>美股每日总结</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -325,42 +327,8 @@
             box-shadow: none;
         }
 
-        .screenshot-section {
-            text-align: center;
-            margin: 15px 0;
-        }
-
-        .screenshot-btn {
-            padding: 12px 25px;
-            background-color: rgb(255, 149, 0);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-family: 'MiSans-Medium', sans-serif;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin: 0 auto;
-            box-shadow: 0 2px 8px rgba(255, 149, 0, 0.3);
-        }
-
-        .screenshot-btn:hover {
-            background-color: rgb(230, 134, 0);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
-        }
-
-        .screenshot-btn:active {
-            transform: translateY(0);
-        }
-
         /* 截图时隐藏的元素 */
         .screenshot-mode .navigation,
-        .screenshot-mode .screenshot-section,
         .screenshot-mode .refresh-btn {
             display: none !important;
         }
@@ -425,20 +393,13 @@
             </button>
         </div>
         
-        <div class="screenshot-section">
-            <button class="screenshot-btn" onclick="captureScreenshot()" id="screenshotBtn">
-                <i class="ri-camera-line"></i>
-                <span id="screenshotBtnText">生成图片</span>
-            </button>
-        </div>
-        
         <div class="footer">
             © 2025 美股行情每日总结 · 数据仅供参考
         </div>
     </div>
 
-    <button class="refresh-btn" id="refreshBtn" onclick="loadData()" title="刷新数据">
-        <i class="ri-refresh-line"></i>
+    <button class="refresh-btn" id="refreshBtn" onclick="captureScreenshot()" title="生成图片">
+        <i class="ri-camera-line"></i>
     </button>
 
     <a href="/admin.html" class="admin-link" title="后台管理">
@@ -623,20 +584,7 @@
         // 页面加载时获取数据
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
-            updateScreenshotButtonText();
         });
-
-        // 根据设备类型更新截图按钮文本
-        function updateScreenshotButtonText() {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            const btnText = document.getElementById('screenshotBtnText');
-            
-            if (isMobile) {
-                btnText.textContent = '保存到相册';
-            } else {
-                btnText.textContent = '生成图片';
-            }
-        }
 
         // 截图功能
         async function captureScreenshot() {

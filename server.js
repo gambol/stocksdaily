@@ -3,9 +3,22 @@ const multer = require('multer');
 const cors = require('cors');
 const fs = require('fs-extra');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 9821;
+
+// JWT 密钥（生产环境应该使用环境变量）
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+
+// 管理员账户（生产环境应该使用数据库）
+const ADMIN_CREDENTIALS = {
+    username: 'admin',
+    password: 'admin123' // 生产环境应该使用加密密码
+};
+
+// 存储验证码（生产环境应该使用Redis）
+const captchaStore = new Map();
 
 // 中间件
 app.use(cors());
@@ -15,6 +28,34 @@ app.use(express.static('public'));
 // 确保data目录存在
 const dataDir = path.join(__dirname, 'data');
 fs.ensureDirSync(dataDir);
+
+// 生成验证码
+function generateCaptcha() {
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let captcha = '';
+    for (let i = 0; i < 4; i++) {
+        captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return captcha;
+}
+
+// JWT 认证中间件
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ error: '访问令牌缺失' });
+    }
+    
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ error: '访问令牌无效' });
+        }
+        req.user = user;
+        next();
+    });
+}
 
 // 配置multer用于文件上传
 const storage = multer.diskStorage({
@@ -39,6 +80,70 @@ const upload = multer({
     }
 });
 
+// 获取验证码
+app.get('/api/admin/captcha', (req, res) => {
+    const captcha = generateCaptcha();
+    const sessionId = Date.now().toString();
+    
+    // 存储验证码，5分钟有效期
+    captchaStore.set(sessionId, {
+        code: captcha,
+        timestamp: Date.now()
+    });
+    
+    // 5分钟后自动删除
+    setTimeout(() => {
+        captchaStore.delete(sessionId);
+    }, 5 * 60 * 1000);
+    
+    res.json({
+        sessionId,
+        captcha: captcha
+    });
+});
+
+// 管理员登录
+app.post('/api/admin/login', async (req, res) => {
+    try {
+        const { username, password, captcha, sessionId } = req.body;
+        
+        // 验证验证码
+        const storedCaptcha = captchaStore.get(sessionId);
+        if (!storedCaptcha) {
+            return res.status(400).json({ error: '验证码已过期，请重新获取' });
+        }
+        
+        // 检查验证码是否过期（5分钟）
+        if (Date.now() - storedCaptcha.timestamp > 5 * 60 * 1000) {
+            captchaStore.delete(sessionId);
+            return res.status(400).json({ error: '验证码已过期，请重新获取' });
+        }
+        
+        // 验证验证码
+        if (captcha.toUpperCase() !== storedCaptcha.code) {
+            return res.status(400).json({ error: '验证码错误' });
+        }
+        
+        // 验证用户名和密码
+        if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+            // 删除已使用的验证码
+            captchaStore.delete(sessionId);
+            
+            const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '24h' });
+            res.json({ 
+                message: '登录成功',
+                token,
+                username
+            });
+        } else {
+            res.status(401).json({ error: '用户名或密码错误' });
+        }
+    } catch (error) {
+        console.error('登录失败:', error);
+        res.status(500).json({ error: '登录失败' });
+    }
+});
+
 // 获取指定日期的股市数据
 app.get('/api/data/:date?', async (req, res) => {
     try {
@@ -55,10 +160,14 @@ app.get('/api/data/:date?', async (req, res) => {
         // 检查是否存在指定日期的数据文件
         if (await fs.pathExists(dataPath)) {
             const data = await fs.readJson(dataPath);
+            // 使用文件名中的日期，而不是JSON中的日期
+            data.date = targetDate;
             res.json(data);
         } else {
             // 如果没有指定日期的数据，返回示例数据
             const sampleData = await fs.readJson(path.join(__dirname, 'sample-data.json'));
+            // 使用请求的日期
+            sampleData.date = targetDate;
             res.json(sampleData);
         }
     } catch (error) {
@@ -67,8 +176,8 @@ app.get('/api/data/:date?', async (req, res) => {
     }
 });
 
-// 上传新的JSON数据
-app.post('/api/upload-data', upload.single('jsonFile'), async (req, res) => {
+// 上传新的JSON数据（需要认证）
+app.post('/api/upload-data', authenticateToken, upload.single('jsonFile'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: '没有上传文件' });
@@ -78,16 +187,23 @@ app.post('/api/upload-data', upload.single('jsonFile'), async (req, res) => {
         const uploadedData = await fs.readJson(req.file.path);
         
         // 验证JSON格式
-        if (!uploadedData.date || !uploadedData.indices || !uploadedData.marketAnalysis || !uploadedData.importantEvents) {
+        if (!uploadedData.indices || !uploadedData.marketAnalysis || !uploadedData.importantEvents) {
             await fs.remove(req.file.path); // 删除无效文件
-            return res.status(400).json({ error: 'JSON格式不正确，缺少必要字段：date, indices, marketAnalysis, importantEvents' });
+            return res.status(400).json({ error: 'JSON格式不正确，缺少必要字段：indices, marketAnalysis, importantEvents' });
+        }
+
+        // 从文件名中提取日期，如果没有则使用JSON中的日期
+        let targetDate = uploadedData.date;
+        if (!targetDate) {
+            const today = new Date();
+            targetDate = today.toISOString().split('T')[0];
         }
 
         // 添加时间戳
         uploadedData.lastUpdated = new Date().toISOString();
 
         // 根据日期保存数据文件
-        const dateFileName = `${uploadedData.date}.json`;
+        const dateFileName = `${targetDate}.json`;
         const dateDataPath = path.join(dataDir, dateFileName);
         await fs.writeJson(dateDataPath, uploadedData, { spaces: 2 });
 
@@ -96,7 +212,7 @@ app.post('/api/upload-data', upload.single('jsonFile'), async (req, res) => {
 
         res.json({ 
             message: '数据上传成功',
-            date: uploadedData.date,
+            date: targetDate,
             filename: dateFileName,
             timestamp: new Date().toISOString()
         });
@@ -106,8 +222,8 @@ app.post('/api/upload-data', upload.single('jsonFile'), async (req, res) => {
     }
 });
 
-// 获取可用日期列表
-app.get('/api/available-dates', async (req, res) => {
+// 获取可用日期列表（需要认证）
+app.get('/api/available-dates', authenticateToken, async (req, res) => {
     try {
         const files = await fs.readdir(dataDir);
         const dateFiles = files
@@ -132,29 +248,52 @@ app.get('/api/available-dates', async (req, res) => {
     }
 });
 
+// 删除指定日期的数据（需要认证）
+app.delete('/api/admin/delete-data/:date', authenticateToken, async (req, res) => {
+    try {
+        const { date } = req.params;
+        const dataPath = path.join(dataDir, `${date}.json`);
+        
+        if (await fs.pathExists(dataPath)) {
+            await fs.remove(dataPath);
+            res.json({ message: `数据删除成功: ${date}` });
+        } else {
+            res.status(404).json({ error: '数据文件不存在' });
+        }
+    } catch (error) {
+        console.error('删除数据失败:', error);
+        res.status(500).json({ error: '删除数据失败' });
+    }
+});
 
-
-// 直接通过API更新数据（不需要文件上传）
-app.post('/api/update-data', async (req, res) => {
+// 直接通过API更新数据（需要认证）
+app.post('/api/update-data', authenticateToken, async (req, res) => {
     try {
         const newData = req.body;
         
         // 验证数据格式
-        if (!newData.date || !newData.indices || !newData.marketAnalysis || !newData.importantEvents) {
-            return res.status(400).json({ error: 'JSON格式不正确，缺少必要字段：date, indices, marketAnalysis, importantEvents' });
+        if (!newData.indices || !newData.marketAnalysis || !newData.importantEvents) {
+            return res.status(400).json({ error: 'JSON格式不正确，缺少必要字段：indices, marketAnalysis, importantEvents' });
+        }
+
+        // 从请求中获取日期，如果没有则使用JSON中的日期
+        let targetDate = newData.date;
+        if (!targetDate) {
+            const today = new Date();
+            targetDate = today.toISOString().split('T')[0];
         }
 
         // 添加时间戳
         newData.lastUpdated = new Date().toISOString();
 
         // 根据日期保存数据文件
-        const dateFileName = `${newData.date}.json`;
+        const dateFileName = `${targetDate}.json`;
         const dateDataPath = path.join(dataDir, dateFileName);
         await fs.writeJson(dateDataPath, newData, { spaces: 2 });
 
         res.json({ 
             message: '数据更新成功',
-            date: newData.date,
+            date: targetDate,
             filename: dateFileName,
             timestamp: newData.lastUpdated
         });
@@ -168,9 +307,13 @@ app.post('/api/update-data', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`美股信息网站服务器运行在 http://localhost:${PORT}`);
     console.log(`主页面: http://localhost:${PORT}/index.html`);
+    console.log(`后台管理: http://localhost:${PORT}/admin.html`);
     console.log(`API接口:`);
     console.log(`  获取今天数据: http://localhost:${PORT}/api/data`);
     console.log(`  获取指定日期数据: http://localhost:${PORT}/api/data/YYYY-MM-DD`);
+    console.log(`  获取验证码: GET http://localhost:${PORT}/api/admin/captcha`);
+    console.log(`  管理员登录: POST http://localhost:${PORT}/api/admin/login`);
     console.log(`  上传数据: POST http://localhost:${PORT}/api/upload-data`);
     console.log(`  更新数据: POST http://localhost:${PORT}/api/update-data`);
+    console.log(`管理员账户: ${ADMIN_CREDENTIALS.username} / ${ADMIN_CREDENTIALS.password}`);
 }); 

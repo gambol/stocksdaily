@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美股每日总结 - 后台管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .admin-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+        .admin-header {
+            background: linear-gradient(135deg, #12bf53 0%, #0ea84a 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .admin-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .admin-content {
+            padding: 40px;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #12bf53;
+        }
+        .json-textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            resize: vertical;
+            line-height: 1.4;
+        }
+        .json-textarea:focus {
+            outline: none;
+            border-color: #12bf53;
+        }
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #12bf53 0%, #0ea84a 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(18, 191, 83, 0.3);
+        }
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #e1e5e9;
+        }
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .alert-success {
+            background-color: rgba(18, 191, 83, 0.1);
+            border: 1px solid rgba(18, 191, 83, 0.2);
+            color: #0ea84a;
+        }
+        .alert-error {
+            background-color: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            color: #d70015;
+        }
+        .alert-info {
+            background-color: rgba(0, 122, 255, 0.1);
+            border: 1px solid rgba(0, 122, 255, 0.2);
+            color: #007aff;
+        }
+        .login-form, .upload-form {
+            display: none;
+        }
+        .login-form.active, .upload-form.active {
+            display: block;
+        }
+        .back-link {
+            color: #12bf53;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .captcha-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .captcha-input {
+            flex: 1;
+        }
+        .captcha-display {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 18px;
+            min-width: 80px;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .captcha-display:hover {
+            background: #e0e0e0;
+        }
+        .user-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .user-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+        .logout-btn:hover {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">后台管理</h1>
+            <p>美股每日总结数据管理</p>
+        </div>
+        
+        <div class="admin-content">
+            <a href="/" class="back-link">← 返回首页</a>
+            
+            <!-- 登录表单 -->
+            <div id="loginForm" class="login-form active">
+                <h2 style="margin-bottom: 25px;">管理员登录</h2>
+                <div id="loginAlert" class="alert" style="display: none;"></div>
+                
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">用户名</label>
+                        <input type="text" id="username" class="form-input" placeholder="请输入用户名" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">密码</label>
+                        <input type="password" id="password" class="form-input" placeholder="请输入密码" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">验证码</label>
+                        <div class="captcha-group">
+                            <input type="text" id="captcha" class="form-input captcha-input" placeholder="请输入验证码" required>
+                            <div id="captchaDisplay" class="captcha-display" onclick="refreshCaptcha()">
+                                点击获取
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ri-login-box-line"></i>
+                        登录
+                    </button>
+                </form>
+            </div>
+            
+            <!-- 数据管理表单 -->
+            <div id="uploadForm" class="upload-form">
+                <!-- 用户信息 -->
+                <div class="user-info">
+                    <span class="user-name">欢迎，<span id="currentUser"></span></span>
+                    <button class="logout-btn" onclick="handleLogout()">
+                        <i class="ri-logout-box-line"></i>
+                        退出
+                    </button>
+                </div>
+                
+                <h2 style="margin-bottom: 25px;">数据管理</h2>
+                <div id="uploadAlert" class="alert" style="display: none;"></div>
+                
+                <form onsubmit="handleSubmit(event)">
+                    <div class="form-group">
+                        <label class="form-label">JSON数据内容</label>
+                        <textarea id="jsonContent" class="json-textarea" placeholder="请粘贴或输入JSON数据内容..." required></textarea>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" onclick="formatJSON()">
+                            <i class="ri-indent-increase"></i>
+                            格式化JSON
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="loadSampleData()">
+                            <i class="ri-file-text-line"></i>
+                            加载示例
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-save-line"></i>
+                            保存数据
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSessionId = '';
+        
+        // 检查登录状态
+        function checkAuth() {
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                showUploadForm();
+            } else {
+                showLoginForm();
+                refreshCaptcha();
+            }
+        }
+        
+        // 显示登录表单
+        function showLoginForm() {
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('uploadForm').classList.remove('active');
+        }
+        
+        // 显示上传表单
+        function showUploadForm() {
+            document.getElementById('loginForm').classList.remove('active');
+            document.getElementById('uploadForm').classList.add('active');
+            document.getElementById('currentUser').textContent = localStorage.getItem('adminUser') || '管理员';
+        }
+        
+        // 获取验证码
+        async function refreshCaptcha() {
+            try {
+                const response = await fetch('/api/admin/captcha');
+                const data = await response.json();
+                
+                currentSessionId = data.sessionId;
+                document.getElementById('captchaDisplay').textContent = data.captcha;
+                document.getElementById('captcha').value = '';
+            } catch (error) {
+                console.error('获取验证码失败:', error);
+                document.getElementById('captchaDisplay').textContent = '获取失败';
+            }
+        }
+        
+        // 处理登录
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const captcha = document.getElementById('captcha').value;
+            
+            if (!currentSessionId) {
+                showAlert('loginAlert', '请先获取验证码', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        username, 
+                        password, 
+                        captcha, 
+                        sessionId: currentSessionId 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminUser', username);
+                    
+                    showAlert('loginAlert', '登录成功！', 'success');
+                    setTimeout(() => {
+                        showUploadForm();
+                    }, 1000);
+                } else {
+                    showAlert('loginAlert', data.error || '登录失败', 'error');
+                    refreshCaptcha();
+                }
+            } catch (error) {
+                showAlert('loginAlert', '网络错误，请稍后重试', 'error');
+                refreshCaptcha();
+            }
+        }
+        
+        // 处理退出
+        function handleLogout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            showLoginForm();
+            hideAlert('uploadAlert');
+        }
+        
+        // 格式化JSON
+        function formatJSON() {
+            const textarea = document.getElementById('jsonContent');
+            try {
+                const json = JSON.parse(textarea.value);
+                textarea.value = JSON.stringify(json, null, 2);
+                showAlert('uploadAlert', 'JSON格式化成功！', 'success');
+            } catch (error) {
+                showAlert('uploadAlert', 'JSON格式错误，无法格式化', 'error');
+            }
+        }
+        
+        // 加载示例数据
+        function loadSampleData() {
+            const sampleData = {
+                "date": "2025-01-01",
+                "indices": [
+                    {
+                        "name": "道琼斯",
+                        "value": "37,466.11",
+                        "changePercent": "+0.07%"
+                    },
+                    {
+                        "name": "纳斯达克",
+                        "value": "14,847.77",
+                        "changePercent": "-0.09%"
+                    },
+                    {
+                        "name": "标普500",
+                        "value": "4,697.96",
+                        "changePercent": "+0.18%"
+                    }
+                ],
+                "marketAnalysis": [
+                    "美股市场今日表现平稳，三大指数涨跌互现。道琼斯工业平均指数小幅上涨，纳斯达克综合指数微跌，标普500指数温和上涨。",
+                    "市场关注焦点集中在美联储政策走向和通胀数据上。投资者对经济软着陆的预期有所增强。",
+                    "科技股表现分化，部分大型科技股走强，但整体科技板块承压。能源和金融板块表现相对较好。"
+                ],
+                "importantEvents": [
+                    "美联储官员发表讲话，暗示可能维持当前利率水平",
+                    "美国就业数据好于预期，显示劳动力市场依然强劲",
+                    "多家科技公司发布财报，业绩表现参差不齐",
+                    "国际油价小幅上涨，能源股受益走强"
+                ]
+            };
+            
+            document.getElementById('jsonContent').value = JSON.stringify(sampleData, null, 2);
+            showAlert('uploadAlert', '示例数据已加载！', 'info');
+        }
+        
+        // 处理提交
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            const jsonContent = document.getElementById('jsonContent').value.trim();
+            
+            if (!jsonContent) {
+                showAlert('uploadAlert', '请输入JSON数据', 'error');
+                return;
+            }
+            
+            try {
+                // 验证JSON格式
+                const data = JSON.parse(jsonContent);
+                
+                // 验证必要字段
+                if (!data.indices || !data.marketAnalysis || !data.importantEvents) {
+                    showAlert('uploadAlert', 'JSON格式不正确，缺少必要字段：indices, marketAnalysis, importantEvents', 'error');
+                    return;
+                }
+                
+                // 发送数据
+                const response = await fetch('/api/update-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: jsonContent
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('uploadAlert', `数据保存成功！日期: ${result.date}`, 'success');
+                    document.getElementById('jsonContent').value = '';
+                } else {
+                    showAlert('uploadAlert', result.error || '保存失败', 'error');
+                }
+            } catch (error) {
+                showAlert('uploadAlert', 'JSON格式错误，请检查数据格式', 'error');
+            }
+        }
+        
+        // 显示提示信息
+        function showAlert(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `alert alert-${type}`;
+            element.style.display = 'block';
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 隐藏提示信息
+        function hideAlert(elementId) {
+            document.getElementById(elementId).style.display = 'none';
+        }
+        
+        // 页面加载时检查登录状态
+        document.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
+</body>
+</html> 

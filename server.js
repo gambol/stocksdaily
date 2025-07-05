@@ -169,11 +169,35 @@ app.get('/api/data/:date?', async (req, res) => {
             data.date = targetDate;
             res.json(data);
         } else {
-            // 如果没有指定日期的数据，返回示例数据
-            const sampleData = await fs.readJson(path.join(__dirname, 'sample-data.json'));
-            // 使用请求的日期
-            sampleData.date = targetDate;
-            res.json(sampleData);
+            // 如果没有指定日期的数据，查找上一个可用的数据
+            try {
+                const files = await fs.readdir(dataDir);
+                const dateFiles = files
+                    .filter(file => file.match(/^\d{4}-\d{2}-\d{2}\.json$/))
+                    .map(file => file.replace('.json', ''))
+                    .sort((a, b) => new Date(b) - new Date(a)); // 按日期降序排序
+                
+                if (dateFiles.length > 0) {
+                    // 找到最新的可用数据
+                    const latestDate = dateFiles[0];
+                    const latestDataPath = path.join(dataDir, `${latestDate}.json`);
+                    const data = await fs.readJson(latestDataPath);
+                    
+                    // 返回最新数据，但保持请求的日期
+                    data.date = targetDate;
+                    data.originalDate = latestDate; // 添加原始日期信息
+                    res.json(data);
+                } else {
+                    // 如果没有任何数据文件，返回404
+                    res.status(404).json({ 
+                        error: '没有找到任何可用数据',
+                        message: '系统中暂无任何股市数据'
+                    });
+                }
+            } catch (error) {
+                console.error('查找可用数据失败:', error);
+                res.status(500).json({ error: '查找可用数据失败' });
+            }
         }
     } catch (error) {
         console.error('获取数据失败:', error);

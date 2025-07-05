@@ -312,6 +312,24 @@
             box-shadow: none;
         }
 
+        .data-notice {
+            background-color: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            color: rgb(255, 152, 0);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'MiSans-Medium', sans-serif;
+        }
+
+        .data-notice i {
+            font-size: 16px;
+        }
+
         /* 截图时隐藏的元素 */
         .screenshot-mode .navigation,
         .screenshot-mode .refresh-btn {
@@ -330,6 +348,12 @@
                 <i class="ri-time-line"></i>
                 <span id="updateTime">正在加载...</span>
             </div>
+        </div>
+        
+        <!-- 数据提示信息 -->
+        <div id="dataNotice" class="data-notice" style="display: none;">
+            <i class="ri-information-line"></i>
+            <span id="dataNoticeText"></span>
         </div>
         
         <div class="section-title">
@@ -402,12 +426,27 @@
                 currentDate = date;
                 const response = await fetch(`/api/data/${date}`);
                 if (!response.ok) {
+                    if (response.status === 404) {
+                        // 没有找到任何可用数据
+                        const errorData = await response.json();
+                        showError(errorData.message || '没有找到任何可用数据');
+                        return;
+                    }
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
                 
-                // 更新页面内容
-                updateUpdateTime(data.date || date);
+                // 实际数据日期
+                const realDate = data.originalDate || data.date || date;
+                // 检查是否使用了上一个可用数据
+                if (data.originalDate && data.originalDate !== date) {
+                    showDataNotice(`当前显示的是 ${data.originalDate} 的数据（${date} 暂无数据）`);
+                } else {
+                    hideDataNotice();
+                }
+                
+                // 更新页面内容，全部用实际数据日期
+                updateUpdateTime(realDate);
                 updateIndexCards(data.indices || []);
                 updateAnalysis(data.marketAnalysis || []);
                 updateEvents(data.importantEvents || []);
@@ -473,7 +512,7 @@
         }
 
         function updateUpdateTime(date) {
-            document.getElementById('updateTime').textContent = `北京时间 8:00 更新`;
+            document.getElementById('updateTime').textContent = `数据日期：${date}（北京时间 8:00 更新）`;
             // 同时更新页面标题
             document.getElementById('pageTitle').textContent = `美股 ${date} 总结`;
         }
@@ -559,6 +598,20 @@
             document.getElementById('indexCards').innerHTML = errorHtml;
             document.getElementById('analysisSection').innerHTML = errorHtml;
             document.getElementById('eventsList').innerHTML = errorHtml;
+        }
+
+        // 显示数据提示信息
+        function showDataNotice(message) {
+            const noticeElement = document.getElementById('dataNotice');
+            const noticeText = document.getElementById('dataNoticeText');
+            noticeText.textContent = message;
+            noticeElement.style.display = 'flex';
+        }
+
+        // 隐藏数据提示信息
+        function hideDataNotice() {
+            const noticeElement = document.getElementById('dataNotice');
+            noticeElement.style.display = 'none';
         }
 
         // 页面加载时获取数据

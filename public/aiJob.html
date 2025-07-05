@@ -17,8 +17,8 @@
             background-color: white;
             color: rgb(3, 17, 42);
             line-height: 1.4;
-            padding: 12px;
-            font-size: 14px;
+            padding: 8px;
+            font-size: 16px;
         }
 
         .header {
@@ -28,42 +28,42 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border-bottom: 1px solid rgba(3, 17, 42, 0.1);
-            padding: 12px;
-            margin: -12px -12px 16px -12px;
+            padding: 8px;
+            margin: -8px -8px 12px -8px;
             z-index: 10;
         }
 
         .header h1 {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 600;
             color: rgb(3, 17, 42);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .header .date {
-            font-size: 12px;
+            font-size: 14px;
             color: rgba(3, 17, 42, 0.6);
         }
 
         .current-date {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 500;
             color: rgb(3, 17, 42);
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .job-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .job-item {
             background: white;
             border: 1px solid rgba(3, 17, 42, 0.08);
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
             transition: box-shadow 0.2s ease;
         }
 
@@ -75,7 +75,7 @@
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             gap: 8px;
         }
 
@@ -90,34 +90,34 @@
         .location {
             background: rgba(87, 188, 96, 0.1);
             color: rgb(87, 188, 96);
-            padding: 4px 8px;
+            padding: 3px 6px;
             border-radius: 12px;
-            font-size: 11px;
+            font-size: 12px;
             white-space: nowrap;
             font-weight: 500;
         }
 
         .job-intro {
-            font-size: 12px;
+            font-size: 14px;
             color: rgba(3, 17, 42, 0.7);
             line-height: 1.4;
         }
 
         .footer {
-            margin-top: 24px;
-            padding-top: 16px;
+            margin-top: 16px;
+            padding-top: 12px;
             text-align: center;
             border-top: 1px solid rgba(3, 17, 42, 0.08);
         }
 
         .footer p {
-            font-size: 11px;
+            font-size: 13px;
             color: rgba(3, 17, 42, 0.5);
         }
 
         .bottom-navigation {
-            margin-top: 24px;
-            padding-top: 16px;
+            margin-top: 16px;
+            padding-top: 12px;
             border-top: 1px solid rgba(3, 17, 42, 0.08);
         }
 
@@ -126,7 +126,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .nav-btn {
@@ -134,8 +134,8 @@
             color: rgb(87, 188, 96);
             border: 1px solid rgba(87, 188, 96, 0.2);
             border-radius: 8px;
-            padding: 8px 16px;
-            font-size: 13px;
+            padding: 10px 16px;
+            font-size: 15px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -164,7 +164,7 @@
             display: flex;
             justify-content: center;
             gap: 12px;
-            margin-top: 16px;
+            margin-top: 12px;
         }
 
         .screenshot-btn {
@@ -172,8 +172,8 @@
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 14px;
+            padding: 12px 24px;
+            font-size: 16px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -194,18 +194,20 @@
 
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 30px;
             color: rgba(3, 17, 42, 0.6);
+            font-size: 16px;
         }
 
         .error {
             text-align: center;
-            padding: 40px;
+            padding: 30px;
             color: #c62828;
+            font-size: 16px;
         }
 
         .screenshot-preview {
-            margin-top: 20px;
+            margin-top: 16px;
             text-align: center;
         }
 
@@ -228,9 +230,9 @@
             background: rgb(3, 17, 42);
             color: white;
             text-decoration: none;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 14px;
             transition: background-color 0.2s ease;
         }
 
@@ -241,33 +243,56 @@
         /* 移动端优化 */
         @media (max-width: 480px) {
             body {
-                padding: 8px;
-                font-size: 13px;
+                padding: 6px;
+                font-size: 16px;
             }
             
             .header {
-                margin: -8px -8px 12px -8px;
-                padding: 10px;
+                margin: -6px -6px 8px -6px;
+                padding: 8px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .header .date {
+                font-size: 16px;
+            }
+            
+            .current-date {
+                font-size: 18px;
+                margin-bottom: 8px;
+            }
+            
+            .job-list {
+                gap: 4px;
             }
             
             .nav-controls {
                 flex-direction: column;
-                gap: 8px;
+                gap: 6px;
+                margin-bottom: 8px;
             }
             
             .nav-btn {
                 width: 100%;
                 justify-content: center;
+                font-size: 17px;
+                padding: 12px 16px;
             }
             
             .screenshot-controls {
                 flex-direction: column;
-                gap: 8px;
+                gap: 6px;
+                margin-top: 8px;
             }
             
             .screenshot-btn {
                 width: 100%;
                 justify-content: center;
+                font-size: 18px;
+                padding: 14px 20px;
             }
             
             .job-item {
@@ -275,27 +300,39 @@
             }
             
             .company-name {
-                font-size: 13px;
+                font-size: 16px;
             }
             
             .location {
-                font-size: 10px;
-                padding: 3px 6px;
+                font-size: 14px;
+                padding: 4px 8px;
             }
             
             .job-intro {
-                font-size: 11px;
+                font-size: 14px;
+            }
+            
+            .footer p {
+                font-size: 14px;
+            }
+            
+            .loading, .error {
+                font-size: 18px;
+                padding: 20px;
+            }
+            
+            .download-link {
+                font-size: 16px;
+                padding: 10px 18px;
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>AI职位信息</h1>
+        <h1>刚拿到融资的 AI 公司</h1>
         <div class="date" id="currentDate">加载中...</div>
     </div>
-
-    <div class="current-date" id="currentDateDisplay">加载中...</div>
 
     <div id="content">
         <div class="loading">正在加载职位信息...</div>
@@ -402,7 +439,6 @@
                 // 如果没有可用数据，尝试加载今天的数据
                 const today = getCurrentDate();
                 document.getElementById('currentDate').textContent = today;
-                document.getElementById('currentDateDisplay').textContent = formatDate(today);
                 await loadJobsByDate(today);
             }
         }
@@ -467,8 +503,7 @@
             `;
 
             // 更新日期显示
-            document.getElementById('currentDate').textContent = data.date;
-            document.getElementById('currentDateDisplay').textContent = formatDate(data.date);
+            document.getElementById('currentDate').textContent = formatDate(data.date);
         }
 
         // 生成小红书截图
@@ -502,25 +537,34 @@
             const targetWidth = 390; // 与页面宽度一致
             const maxHeight = 1200; // 适合小红书的单张图片高度
             
+            // 检测是否为移动设备
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const maxJobsPerPage = isMobile ? 6 : 8; // 移动端每页最多6个，桌面端8个
+            
             let currentPage = [];
             let currentHeight = 0;
             const headerHeight = 60; // 预留头部空间
             const footerHeight = 40; // 预留底部空间
             const itemMargin = 8; // 项目间距
+            let pageIndex = 0; // 页面索引
             
             for (let i = 0; i < jobItems.length; i++) {
                 const item = jobItems[i];
                 const itemHeight = item.offsetHeight;
                 
-                // 检查是否需要开始新页面
-                if (currentHeight + itemHeight + headerHeight + footerHeight > maxHeight && currentPage.length > 0) {
+                // 检查是否需要开始新页面（基于数量或高度）
+                const shouldStartNewPage = currentPage.length >= maxJobsPerPage || 
+                    (currentHeight + itemHeight + headerHeight + footerHeight > maxHeight && currentPage.length > 0);
+                
+                if (shouldStartNewPage) {
                     // 生成当前页面的截图
-                    const pageImage = await createPageScreenshot(currentPage, currentData.date);
+                    const pageImage = await createPageScreenshot(currentPage, currentData.date, pageIndex === 0);
                     images.push(pageImage);
                     
                     // 开始新页面
                     currentPage = [item];
                     currentHeight = itemHeight + itemMargin;
+                    pageIndex++;
                 } else {
                     currentPage.push(item);
                     currentHeight += itemHeight + itemMargin;
@@ -529,7 +573,7 @@
             
             // 生成最后一页的截图
             if (currentPage.length > 0) {
-                const pageImage = await createPageScreenshot(currentPage, currentData.date);
+                const pageImage = await createPageScreenshot(currentPage, currentData.date, pageIndex === 0);
                 images.push(pageImage);
             }
             
@@ -537,7 +581,7 @@
         }
 
         // 创建单页截图
-        async function createPageScreenshot(jobItems, date) {
+        async function createPageScreenshot(jobItems, date, showHeader = true) {
             // 创建临时容器
             const tempContainer = document.createElement('div');
             tempContainer.style.cssText = `
@@ -548,13 +592,15 @@
                 color: rgb(3, 17, 42);
             `;
             
-            // 添加头部
-            tempContainer.innerHTML = `
-                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(3, 17, 42, 0.1);">
-                    <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 8px;">AI职位信息</h1>
-                    <p style="font-size: 14px; color: rgba(3, 17, 42, 0.6);">${formatDate(date)}</p>
-                </div>
-            `;
+            // 只在第一页添加头部
+            if (showHeader) {
+                tempContainer.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(3, 17, 42, 0.1);">
+                        <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 8px;">刚拿到投资 AI 公司</h1>
+                        <p style="font-size: 14px; color: rgba(3, 17, 42, 0.6);">${formatDate(date)}</p>
+                    </div>
+                `;
+            }
             
             // 添加职位项目
             jobItems.forEach(item => {
@@ -562,18 +608,7 @@
                 tempContainer.appendChild(clone);
             });
             
-            // 添加底部信息
-            const footer = document.createElement('div');
-            footer.style.cssText = `
-                text-align: center;
-                margin-top: 20px;
-                padding-top: 15px;
-                border-top: 1px solid rgba(3, 17, 42, 0.1);
-                font-size: 12px;
-                color: rgba(3, 17, 42, 0.5);
-            `;
-            footer.textContent = `共 ${jobItems.length} 个职位机会`;
-            tempContainer.appendChild(footer);
+            // 不再添加底部"共 X 个职位机会"
             
             // 添加到页面（隐藏）
             tempContainer.style.position = 'absolute';
@@ -606,18 +641,96 @@
             imagesContainer.innerHTML = images.map((image, index) => `
                 <div style="margin-bottom: 20px;">
                     <h3 style="margin-bottom: 10px; font-size: 16px;">第 ${index + 1} 张图片</h3>
-                    <img src="${image}" alt="截图 ${index + 1}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                    <img src="${image}" alt="截图 ${index + 1}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);" 
+                         onclick="downloadImage('${image}', 'ai职位-${currentData.date}-第${index + 1}张.png')"
+                         oncontextmenu="return false;"
+                         title="点击下载，长按保存到相册">
                 </div>
             `).join('');
             
             // 显示下载链接
             downloadLinks.innerHTML = images.map((image, index) => `
-                <a href="${image}" download="ai职位-${currentData.date}-第${index + 1}张.png" class="download-link">
+                <a href="javascript:void(0)" onclick="downloadImage('${image}', 'ai职位-${currentData.date}-第${index + 1}张.png')" class="download-link">
                     下载第${index + 1}张
                 </a>
             `).join('');
             
             preview.style.display = 'block';
+        }
+
+        // 下载图片函数
+        function downloadImage(dataUrl, filename) {
+            // 检测是否为移动设备
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // 移动端：创建新窗口显示图片，用户可以长按保存
+                const newWindow = window.open();
+                newWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>${filename}</title>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body {
+                                margin: 0;
+                                padding: 20px;
+                                background: #f5f5f5;
+                                text-align: center;
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            }
+                            .container {
+                                max-width: 100%;
+                                background: white;
+                                border-radius: 12px;
+                                padding: 20px;
+                                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                            }
+                            img {
+                                max-width: 100%;
+                                height: auto;
+                                border-radius: 8px;
+                            }
+                            .instructions {
+                                margin-top: 16px;
+                                color: #666;
+                                font-size: 14px;
+                                line-height: 1.5;
+                            }
+                            .close-btn {
+                                margin-top: 16px;
+                                background: #007AFF;
+                                color: white;
+                                border: none;
+                                padding: 10px 20px;
+                                border-radius: 8px;
+                                font-size: 16px;
+                                cursor: pointer;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <img src="${dataUrl}" alt="${filename}">
+                            <div class="instructions">
+                                <p><strong>保存到相册：</strong></p>
+                                <p>• 长按图片选择"保存图片"</p>
+                                <p>• 或点击图片后选择"保存到相册"</p>
+                            </div>
+                            <button class="close-btn" onclick="window.close()">关闭</button>
+                        </div>
+                    </body>
+                    </html>
+                `);
+            } else {
+                // 桌面端：直接下载
+                const link = document.createElement('a');
+                link.href = dataUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
         }
 
         // 页面加载时获取数据

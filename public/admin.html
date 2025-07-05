@@ -248,30 +248,73 @@
                     </button>
                 </div>
                 
-                <h2 style="margin-bottom: 25px;">数据管理</h2>
-                <div id="uploadAlert" class="alert" style="display: none;"></div>
+                <!-- 功能切换按钮 -->
+                <div class="button-group" style="margin-bottom: 25px;">
+                    <button type="button" class="btn btn-secondary" id="stockBtn" onclick="switchToStock()">
+                        <i class="ri-line-chart-line"></i>
+                        美股数据
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="aijobBtn" onclick="switchToAIJob()">
+                        <i class="ri-briefcase-line"></i>
+                        AI职位
+                    </button>
+                </div>
                 
-                <form onsubmit="handleSubmit(event)">
-                    <div class="form-group">
-                        <label class="form-label">JSON数据内容</label>
-                        <textarea id="jsonContent" class="json-textarea" placeholder="请粘贴或输入JSON数据内容..." required></textarea>
-                    </div>
+                <!-- 美股数据管理 -->
+                <div id="stockForm">
+                    <h2 style="margin-bottom: 25px;">美股数据管理</h2>
+                    <div id="uploadAlert" class="alert" style="display: none;"></div>
                     
-                    <div class="button-group">
-                        <button type="button" class="btn btn-secondary" onclick="formatJSON()">
-                            <i class="ri-indent-increase"></i>
-                            格式化JSON
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="loadSampleData()">
-                            <i class="ri-file-text-line"></i>
-                            加载示例
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="ri-save-line"></i>
-                            保存数据
-                        </button>
-                    </div>
-                </form>
+                    <form onsubmit="handleSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">JSON数据内容</label>
+                            <textarea id="jsonContent" class="json-textarea" placeholder="请粘贴或输入JSON数据内容..." required></textarea>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button type="button" class="btn btn-secondary" onclick="formatJSON()">
+                                <i class="ri-indent-increase"></i>
+                                格式化JSON
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="loadSampleData()">
+                                <i class="ri-file-text-line"></i>
+                                加载示例
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ri-save-line"></i>
+                                保存数据
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- AI职位管理 -->
+                <div id="aijobForm" style="display: none;">
+                    <h2 style="margin-bottom: 25px;">AI职位管理</h2>
+                    <div id="aijobAlert" class="alert" style="display: none;"></div>
+                    
+                    <form onsubmit="handleAIJobSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">职位JSON数据</label>
+                            <textarea id="aijobContent" class="json-textarea" placeholder="请粘贴或输入AI职位JSON数据..." required></textarea>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button type="button" class="btn btn-secondary" onclick="formatAIJobJSON()">
+                                <i class="ri-indent-increase"></i>
+                                格式化JSON
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="loadAIJobSampleData()">
+                                <i class="ri-file-text-line"></i>
+                                加载示例
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ri-save-line"></i>
+                                保存职位数据
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -487,6 +530,119 @@
         
         // 页面加载时检查登录状态
         document.addEventListener('DOMContentLoaded', checkAuth);
+        
+        // 切换到美股数据管理
+        function switchToStock() {
+            document.getElementById('stockForm').style.display = 'block';
+            document.getElementById('aijobForm').style.display = 'none';
+            document.getElementById('stockBtn').classList.add('btn-primary');
+            document.getElementById('stockBtn').classList.remove('btn-secondary');
+            document.getElementById('aijobBtn').classList.add('btn-secondary');
+            document.getElementById('aijobBtn').classList.remove('btn-primary');
+        }
+        
+        // 切换到AI职位管理
+        function switchToAIJob() {
+            document.getElementById('stockForm').style.display = 'none';
+            document.getElementById('aijobForm').style.display = 'block';
+            document.getElementById('aijobBtn').classList.add('btn-primary');
+            document.getElementById('aijobBtn').classList.remove('btn-secondary');
+            document.getElementById('stockBtn').classList.add('btn-secondary');
+            document.getElementById('stockBtn').classList.remove('btn-primary');
+        }
+        
+        // 格式化AI职位JSON
+        function formatAIJobJSON() {
+            const textarea = document.getElementById('aijobContent');
+            try {
+                const json = JSON.parse(textarea.value);
+                textarea.value = JSON.stringify(json, null, 2);
+                showAlert('aijobAlert', 'JSON格式化成功！', 'success');
+            } catch (error) {
+                showAlert('aijobAlert', 'JSON格式错误，无法格式化', 'error');
+            }
+        }
+        
+        // 加载AI职位示例数据
+        function loadAIJobSampleData() {
+            const sampleData = {
+                "date": "2025-07-04",
+                "jobs": [
+                    {
+                        "company": "Woz",
+                        "intro": "AI智能商业建设工具，帮助企业快速构建智能化业务系统。",
+                        "address": "旧金山湾区/可远程工作"
+                    },
+                    {
+                        "company": "Junction",
+                        "intro": "设备连接实验室测试（原名Vital），专注于提供高效的硬件测试解决方案。",
+                        "address": "可远程工作"
+                    },
+                    {
+                        "company": "Neuralink",
+                        "intro": "脑机接口技术公司，致力于开发可植入大脑的芯片技术。",
+                        "address": "旧金山湾区"
+                    },
+                    {
+                        "company": "OpenAI",
+                        "intro": "人工智能研究公司，专注于开发安全的人工通用智能。",
+                        "address": "旧金山湾区/可远程工作"
+                    },
+                    {
+                        "company": "Anthropic",
+                        "intro": "AI安全研究公司，开发有益、诚实、无害的AI系统。",
+                        "address": "旧金山湾区"
+                    }
+                ]
+            };
+            
+            document.getElementById('aijobContent').value = JSON.stringify(sampleData, null, 2);
+            showAlert('aijobAlert', 'AI职位示例数据已加载！', 'info');
+        }
+        
+        // 处理AI职位提交
+        async function handleAIJobSubmit(event) {
+            event.preventDefault();
+            
+            const jsonContent = document.getElementById('aijobContent').value.trim();
+            
+            if (!jsonContent) {
+                showAlert('aijobAlert', '请输入JSON数据', 'error');
+                return;
+            }
+            
+            try {
+                // 验证JSON格式
+                const data = JSON.parse(jsonContent);
+                
+                // 验证必要字段
+                if (!data.jobs || !Array.isArray(data.jobs)) {
+                    showAlert('aijobAlert', 'JSON格式不正确，缺少jobs数组字段', 'error');
+                    return;
+                }
+                
+                // 发送数据
+                const response = await fetch('/api/aijob', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: jsonContent
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('aijobAlert', `AI职位数据保存成功！日期: ${result.date}`, 'success');
+                    document.getElementById('aijobContent').value = '';
+                } else {
+                    showAlert('aijobAlert', result.error || '保存失败', 'error');
+                }
+            } catch (error) {
+                showAlert('aijobAlert', 'JSON格式错误，请检查数据格式', 'error');
+            }
+        }
     </script>
 </body>
 </html> 

@@ -1,0 +1,186 @@
+{
+  "date": "2025-07-04",
+  "jobs": [
+    {
+      "company": "Woz",
+      "intro": "人工智能驱动的商业建设工具",
+      "address": "旧金山湾区/远程工作"
+    },
+    {
+      "company": "Junction（前身为Vital）",
+      "intro": "设备连接实验室测试",
+      "address": "远程工作"
+    },
+    {
+      "company": "Diode Computers公司",
+      "intro": "自动化印刷电路板设计服务",
+      "address": "纽约市"
+    },
+    {
+      "company": "Taelor",
+      "intro": "人工智能策划的服装租赁",
+      "address": "旧金山湾区/远程工作"
+    },
+    {
+      "company": "Helium（自动化付费墙测试）",
+      "intro": "应用内付费墙",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "ReactWise",
+      "intro": "流程优化软件",
+      "address": "英国剑桥"
+    },
+    {
+      "company": "Daylight",
+      "intro": "区块链钱包增强",
+      "address": "纽约市/美国时区远程工作"
+    },
+    {
+      "company": "Anthrogen",
+      "intro": "碳负聚合物制造",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "camfer",
+      "intro": "人工智能生成的模型和仿真",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "WorkDone",
+      "intro": "实时合规监控",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "Context",
+      "intro": "增强语言模型索引",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "Arva AI",
+      "intro": "自动化商业验证解决方案",
+      "address": "伦敦"
+    },
+    {
+      "company": "Ocular AI",
+      "intro": "非结构化数据转换",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "TensorZero",
+      "intro": "开源大语言模型基础设施",
+      "address": "纽约市"
+    },
+    {
+      "company": "Argon AI",
+      "intro": "临床开发自动化",
+      "address": "纽约市"
+    },
+    {
+      "company": "Tera AI",
+      "intro": "零样本导航人工智能",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "Ropes",
+      "intro": "可定制技术评估工具",
+      "address": "纽约市"
+    },
+    {
+      "company": "Iconic",
+      "intro": "人工智能原生3A游戏开发",
+      "address": "伦敦"
+    },
+    {
+      "company": "Tamarind Bio",
+      "intro": "蛋白质结构预测生物信息学",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "DryMerge",
+      "intro": "人工智能驱动的客户关系管理自动化",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "throxy",
+      "intro": "人工智能销售助手自动化",
+      "address": "伦敦"
+    },
+    {
+      "company": "Metalware",
+      "intro": "自动化固件模糊测试解决方案",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "Storycraft",
+      "intro": "人工智能驱动的游戏创作",
+      "address": "远程工作"
+    },
+    {
+      "company": "Circleback",
+      "intro": "自动化会议转录",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "Sent",
+      "intro": "统一多平台通信",
+      "address": "纽约市"
+    },
+    {
+      "company": "Arlo",
+      "intro": "水平资助健康保险",
+      "address": "纽约市/远程工作"
+    },
+    {
+      "company": "Blockus",
+      "intro": "区块链游戏",
+      "address": "远程工作"
+    },
+    {
+      "company": "Medeloop",
+      "intro": "人工智能临床研究自动化",
+      "address": "旧金山湾区/蒙特利尔"
+    },
+    {
+      "company": "Phaselaw",
+      "intro": "人工智能驱动的编辑自动化",
+      "address": "旧金山湾区/纽约市"
+    },
+    {
+      "company": "Paratus Health",
+      "intro": "语音辅助患者预约",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "PointOne",
+      "intro": "人工智能时间跟踪计费",
+      "address": "纽约市"
+    },
+    {
+      "company": "Stackfix",
+      "intro": "数据驱动的品牌比较",
+      "address": "伦敦"
+    },
+    {
+      "company": "Odyssey",
+      "intro": "国家管理的储蓄账户",
+      "address": "纽约市/犹他州"
+    },
+    {
+      "company": "Redcar",
+      "intro": "人工智能销售线索转换",
+      "address": "纽约市"
+    },
+    {
+      "company": "Lemon Slice",
+      "intro": "动画角色生成",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "Claim",
+      "intro": "现金返还奖励匹配",
+      "address": "纽约市/华盛顿特区/洛杉矶"
+    }
+  ],
+  "lastUpdated": "2025-07-05T01:01:18.769Z"
+}

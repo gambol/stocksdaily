@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI职位信息</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: white;
+            color: rgb(3, 17, 42);
+            line-height: 1.4;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(3, 17, 42, 0.1);
+            padding: 12px;
+            margin: -12px -12px 16px -12px;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: rgb(3, 17, 42);
+            margin-bottom: 4px;
+        }
+
+        .header .date {
+            font-size: 12px;
+            color: rgba(3, 17, 42, 0.6);
+        }
+
+        .current-date {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgb(3, 17, 42);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .job-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .job-item {
+            background: white;
+            border: 1px solid rgba(3, 17, 42, 0.08);
+            border-radius: 8px;
+            padding: 12px;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .job-item:hover {
+            box-shadow: 0 2px 8px rgba(3, 17, 42, 0.08);
+        }
+
+        .job-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            gap: 8px;
+        }
+
+        .company-name {
+            font-weight: 500;
+            font-size: 14px;
+            color: rgb(3, 17, 42);
+            line-height: 1.3;
+            flex: 1;
+        }
+
+        .location {
+            background: rgba(87, 188, 96, 0.1);
+            color: rgb(87, 188, 96);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .job-intro {
+            font-size: 12px;
+            color: rgba(3, 17, 42, 0.7);
+            line-height: 1.4;
+        }
+
+        .footer {
+            margin-top: 24px;
+            padding-top: 16px;
+            text-align: center;
+            border-top: 1px solid rgba(3, 17, 42, 0.08);
+        }
+
+        .footer p {
+            font-size: 11px;
+            color: rgba(3, 17, 42, 0.5);
+        }
+
+        .bottom-navigation {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(3, 17, 42, 0.08);
+        }
+
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .nav-btn {
+            background: rgba(87, 188, 96, 0.1);
+            color: rgb(87, 188, 96);
+            border: 1px solid rgba(87, 188, 96, 0.2);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(87, 188, 96, 0.2);
+            border-color: rgb(87, 188, 96);
+        }
+
+        .nav-btn:disabled {
+            background: rgba(3, 17, 42, 0.05);
+            color: rgba(3, 17, 42, 0.3);
+            border-color: rgba(3, 17, 42, 0.1);
+            cursor: not-allowed;
+        }
+
+        .nav-btn:disabled:hover {
+            background: rgba(3, 17, 42, 0.05);
+            border-color: rgba(3, 17, 42, 0.1);
+        }
+
+        .screenshot-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .screenshot-btn {
+            background: rgb(87, 188, 96);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .screenshot-btn:hover {
+            background: rgb(76, 175, 80);
+            transform: translateY(-1px);
+        }
+
+        .screenshot-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: rgba(3, 17, 42, 0.6);
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #c62828;
+        }
+
+        .screenshot-preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .screenshot-preview img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .download-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 16px;
+        }
+
+        .download-link {
+            background: rgb(3, 17, 42);
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            transition: background-color 0.2s ease;
+        }
+
+        .download-link:hover {
+            background: rgb(2, 12, 27);
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+                font-size: 13px;
+            }
+            
+            .header {
+                margin: -8px -8px 12px -8px;
+                padding: 10px;
+            }
+            
+            .nav-controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .nav-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .screenshot-controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .screenshot-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .job-item {
+                padding: 10px;
+            }
+            
+            .company-name {
+                font-size: 13px;
+            }
+            
+            .location {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+            
+            .job-intro {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AI职位信息</h1>
+        <div class="date" id="currentDate">加载中...</div>
+    </div>
+
+    <div class="current-date" id="currentDateDisplay">加载中...</div>
+
+    <div id="content">
+        <div class="loading">正在加载职位信息...</div>
+    </div>
+
+    <div class="bottom-navigation">
+        <div class="nav-controls">
+            <button class="nav-btn" id="prevBtn" onclick="loadPrevious()" disabled>
+                <span>←</span>
+                上一条
+            </button>
+            <button class="nav-btn" id="nextBtn" onclick="loadNext()" disabled>
+                下一条
+                <span>→</span>
+            </button>
+        </div>
+        
+        <div class="screenshot-controls">
+            <button class="screenshot-btn" id="screenshotBtn" onclick="generateScreenshots()">
+                <span>📸</span>
+                生成小红书截图
+            </button>
+        </div>
+        
+        <div id="screenshotPreview" class="screenshot-preview" style="display: none;">
+            <div id="screenshotImages"></div>
+            <div id="downloadLinks" class="download-links"></div>
+        </div>
+    </div>
+
+    <script>
+        let availableDates = [];
+        let currentDateIndex = 0;
+        let currentData = null;
+
+        // 获取当前日期
+        function getCurrentDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 格式化日期显示
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${year}年${month}月${day}日`;
+        }
+
+        // 获取可用的日期列表
+        async function loadAvailableDates() {
+            try {
+                const response = await fetch('/api/aijob-dates');
+                if (response.ok) {
+                    availableDates = await response.json();
+                    // 按日期排序，最新的在前面
+                    availableDates.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    return availableDates.length > 0;
+                }
+                return false;
+            } catch (error) {
+                console.error('获取可用日期失败:', error);
+                return false;
+            }
+        }
+
+        // 加载指定日期的数据
+        async function loadJobsByDate(date) {
+            try {
+                const response = await fetch(`/api/aijob/${date}`);
+                if (!response.ok) {
+                    throw new Error('没有找到该日期的职位数据');
+                }
+                
+                const data = await response.json();
+                currentData = data;
+                renderJobs(data);
+                updateNavigation();
+                return true;
+            } catch (error) {
+                console.error('加载职位数据失败:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        <p>暂无职位信息</p>
+                        <p style="font-size: 11px; margin-top: 8px;">请稍后再试</p>
+                    </div>
+                `;
+                return false;
+            }
+        }
+
+        // 加载最近的数据
+        async function loadLatestJobs() {
+            const hasDates = await loadAvailableDates();
+            if (hasDates && availableDates.length > 0) {
+                currentDateIndex = 0;
+                const latestDate = availableDates[0].date;
+                await loadJobsByDate(latestDate);
+            } else {
+                // 如果没有可用数据，尝试加载今天的数据
+                const today = getCurrentDate();
+                document.getElementById('currentDate').textContent = today;
+                document.getElementById('currentDateDisplay').textContent = formatDate(today);
+                await loadJobsByDate(today);
+            }
+        }
+
+        // 加载上一条数据
+        async function loadPrevious() {
+            if (currentDateIndex < availableDates.length - 1) {
+                currentDateIndex++;
+                const date = availableDates[currentDateIndex].date;
+                await loadJobsByDate(date);
+            }
+        }
+
+        // 加载下一条数据
+        async function loadNext() {
+            if (currentDateIndex > 0) {
+                currentDateIndex--;
+                const date = availableDates[currentDateIndex].date;
+                await loadJobsByDate(date);
+            }
+        }
+
+        // 更新导航按钮状态
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentDateIndex >= availableDates.length - 1;
+            nextBtn.disabled = currentDateIndex <= 0;
+        }
+
+        // 渲染职位列表
+        function renderJobs(data) {
+            const content = document.getElementById('content');
+            
+            if (!data.jobs || data.jobs.length === 0) {
+                content.innerHTML = `
+                    <div class="error">
+                        <p>暂无职位信息</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const jobList = data.jobs.map(job => `
+                <div class="job-item">
+                    <div class="job-header">
+                        <div class="company-name">${job.company || '未知公司'}</div>
+                        <div class="location">${job.address || '地址未知'}</div>
+                    </div>
+                    <div class="job-intro">${job.intro || '暂无描述'}</div>
+                </div>
+            `).join('');
+
+            content.innerHTML = `
+                <div class="job-list">
+                    ${jobList}
+                </div>
+                <div class="footer">
+                    <p>共 ${data.jobs.length} 个职位机会</p>
+                </div>
+            `;
+
+            // 更新日期显示
+            document.getElementById('currentDate').textContent = data.date;
+            document.getElementById('currentDateDisplay').textContent = formatDate(data.date);
+        }
+
+        // 生成小红书截图
+        async function generateScreenshots() {
+            const screenshotBtn = document.getElementById('screenshotBtn');
+            const preview = document.getElementById('screenshotPreview');
+            
+            screenshotBtn.disabled = true;
+            screenshotBtn.innerHTML = '<span>⏳</span> 生成中...';
+            preview.style.display = 'none';
+            
+            try {
+                const images = await createScreenshots();
+                displayScreenshots(images);
+            } catch (error) {
+                console.error('生成截图失败:', error);
+                alert('生成截图失败，请重试');
+            } finally {
+                screenshotBtn.disabled = false;
+                screenshotBtn.innerHTML = '<span>📸</span> 生成小红书截图';
+            }
+        }
+
+        // 创建截图
+        async function createScreenshots() {
+            const content = document.getElementById('content');
+            const jobItems = content.querySelectorAll('.job-item');
+            const images = [];
+            
+            // 小红书推荐尺寸：1080x1920，但我们需要适合的宽度
+            const targetWidth = 390; // 与页面宽度一致
+            const maxHeight = 1200; // 适合小红书的单张图片高度
+            
+            let currentPage = [];
+            let currentHeight = 0;
+            const headerHeight = 60; // 预留头部空间
+            const footerHeight = 40; // 预留底部空间
+            const itemMargin = 8; // 项目间距
+            
+            for (let i = 0; i < jobItems.length; i++) {
+                const item = jobItems[i];
+                const itemHeight = item.offsetHeight;
+                
+                // 检查是否需要开始新页面
+                if (currentHeight + itemHeight + headerHeight + footerHeight > maxHeight && currentPage.length > 0) {
+                    // 生成当前页面的截图
+                    const pageImage = await createPageScreenshot(currentPage, currentData.date);
+                    images.push(pageImage);
+                    
+                    // 开始新页面
+                    currentPage = [item];
+                    currentHeight = itemHeight + itemMargin;
+                } else {
+                    currentPage.push(item);
+                    currentHeight += itemHeight + itemMargin;
+                }
+            }
+            
+            // 生成最后一页的截图
+            if (currentPage.length > 0) {
+                const pageImage = await createPageScreenshot(currentPage, currentData.date);
+                images.push(pageImage);
+            }
+            
+            return images;
+        }
+
+        // 创建单页截图
+        async function createPageScreenshot(jobItems, date) {
+            // 创建临时容器
+            const tempContainer = document.createElement('div');
+            tempContainer.style.cssText = `
+                width: 390px;
+                background: white;
+                padding: 20px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                color: rgb(3, 17, 42);
+            `;
+            
+            // 添加头部
+            tempContainer.innerHTML = `
+                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(3, 17, 42, 0.1);">
+                    <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 8px;">AI职位信息</h1>
+                    <p style="font-size: 14px; color: rgba(3, 17, 42, 0.6);">${formatDate(date)}</p>
+                </div>
+            `;
+            
+            // 添加职位项目
+            jobItems.forEach(item => {
+                const clone = item.cloneNode(true);
+                tempContainer.appendChild(clone);
+            });
+            
+            // 添加底部信息
+            const footer = document.createElement('div');
+            footer.style.cssText = `
+                text-align: center;
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid rgba(3, 17, 42, 0.1);
+                font-size: 12px;
+                color: rgba(3, 17, 42, 0.5);
+            `;
+            footer.textContent = `共 ${jobItems.length} 个职位机会`;
+            tempContainer.appendChild(footer);
+            
+            // 添加到页面（隐藏）
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.top = '0';
+            document.body.appendChild(tempContainer);
+            
+            // 生成截图
+            const canvas = await html2canvas(tempContainer, {
+                width: 390,
+                scale: 2,
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                allowTaint: true
+            });
+            
+            // 清理临时元素
+            document.body.removeChild(tempContainer);
+            
+            return canvas.toDataURL('image/png');
+        }
+
+        // 显示截图
+        function displayScreenshots(images) {
+            const preview = document.getElementById('screenshotPreview');
+            const imagesContainer = document.getElementById('screenshotImages');
+            const downloadLinks = document.getElementById('downloadLinks');
+            
+            // 显示图片
+            imagesContainer.innerHTML = images.map((image, index) => `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 10px; font-size: 16px;">第 ${index + 1} 张图片</h3>
+                    <img src="${image}" alt="截图 ${index + 1}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                </div>
+            `).join('');
+            
+            // 显示下载链接
+            downloadLinks.innerHTML = images.map((image, index) => `
+                <a href="${image}" download="ai职位-${currentData.date}-第${index + 1}张.png" class="download-link">
+                    下载第${index + 1}张
+                </a>
+            `).join('');
+            
+            preview.style.display = 'block';
+        }
+
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', loadLatestJobs);
+    </script>
+</body>
+</html> 

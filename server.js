@@ -308,17 +308,131 @@ app.post('/api/update-data', authenticateToken, async (req, res) => {
     }
 });
 
+// 获取指定日期的AI职位数据
+app.get('/api/aijob/:date?', async (req, res) => {
+    try {
+        let targetDate = req.params.date;
+        
+        // 如果没有指定日期，使用今天的日期
+        if (!targetDate) {
+            const today = new Date();
+            targetDate = today.toISOString().split('T')[0]; // 格式：YYYY-MM-DD
+        }
+        
+        const dataPath = path.join(dataDir, `aijob-${targetDate}.json`);
+        
+        // 检查是否存在指定日期的数据文件
+        if (await fs.pathExists(dataPath)) {
+            const data = await fs.readJson(dataPath);
+            // 使用文件名中的日期，而不是JSON中的日期
+            data.date = targetDate;
+            res.json(data);
+        } else {
+            // 如果没有指定日期的数据，返回空数据
+            res.status(404).json({ error: '没有找到该日期的AI职位数据' });
+        }
+    } catch (error) {
+        console.error('获取AI职位数据失败:', error);
+        res.status(500).json({ error: '获取AI职位数据失败' });
+    }
+});
+
+// 保存AI职位数据（需要认证）
+app.post('/api/aijob', authenticateToken, async (req, res) => {
+    try {
+        const newData = req.body;
+        
+        // 验证数据格式
+        if (!newData.jobs || !Array.isArray(newData.jobs)) {
+            return res.status(400).json({ error: 'JSON格式不正确，缺少jobs数组字段' });
+        }
+
+        // 从请求中获取日期，如果没有则使用JSON中的日期
+        let targetDate = newData.date;
+        if (!targetDate) {
+            const today = new Date();
+            targetDate = today.toISOString().split('T')[0];
+        }
+
+        // 添加时间戳
+        newData.lastUpdated = new Date().toISOString();
+
+        // 根据日期保存数据文件
+        const dateFileName = `aijob-${targetDate}.json`;
+        const dateDataPath = path.join(dataDir, dateFileName);
+        await fs.writeJson(dateDataPath, newData, { spaces: 2 });
+
+        res.json({ 
+            message: 'AI职位数据保存成功',
+            date: targetDate,
+            filename: dateFileName,
+            timestamp: newData.lastUpdated
+        });
+    } catch (error) {
+        console.error('保存AI职位数据失败:', error);
+        res.status(500).json({ error: '保存AI职位数据失败: ' + error.message });
+    }
+});
+
+// 获取AI职位可用日期列表
+app.get('/api/aijob-dates', async (req, res) => {
+    try {
+        const files = await fs.readdir(dataDir);
+        const dateFiles = files
+            .filter(file => file.match(/^aijob-\d{4}-\d{2}-\d{2}\.json$/))
+            .map(file => {
+                const date = file.replace('aijob-', '').replace('.json', '');
+                const filePath = path.join(dataDir, file);
+                const stats = fs.statSync(filePath);
+                return {
+                    date: date,
+                    filename: file,
+                    lastModified: stats.mtime.toISOString(),
+                    size: stats.size
+                };
+            })
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        res.json(dateFiles);
+    } catch (error) {
+        console.error('获取AI职位可用日期失败:', error);
+        res.status(500).json({ error: '获取AI职位可用日期失败' });
+    }
+});
+
+// 删除指定日期的AI职位数据（需要认证）
+app.delete('/api/admin/delete-aijob/:date', authenticateToken, async (req, res) => {
+    try {
+        const { date } = req.params;
+        const dataPath = path.join(dataDir, `aijob-${date}.json`);
+        
+        if (await fs.pathExists(dataPath)) {
+            await fs.remove(dataPath);
+            res.json({ message: `AI职位数据删除成功: ${date}` });
+        } else {
+            res.status(404).json({ error: 'AI职位数据文件不存在' });
+        }
+    } catch (error) {
+        console.error('删除AI职位数据失败:', error);
+        res.status(500).json({ error: '删除AI职位数据失败' });
+    }
+});
+
 // 启动服务器
 app.listen(PORT, () => {
     console.log(`美股信息网站服务器运行在 http://localhost:${PORT}`);
     console.log(`主页面: http://localhost:${PORT}/index.html`);
+    console.log(`AI职位页面: http://localhost:${PORT}/aiJob.html`);
     console.log(`后台管理: http://localhost:${PORT}/admin.html`);
     console.log(`API接口:`);
     console.log(`  获取今天数据: http://localhost:${PORT}/api/data`);
     console.log(`  获取指定日期数据: http://localhost:${PORT}/api/data/YYYY-MM-DD`);
+    console.log(`  获取今天AI职位: http://localhost:${PORT}/api/aijob`);
+    console.log(`  获取指定日期AI职位: http://localhost:${PORT}/api/aijob/YYYY-MM-DD`);
     console.log(`  获取验证码: GET http://localhost:${PORT}/api/admin/captcha`);
     console.log(`  管理员登录: POST http://localhost:${PORT}/api/admin/login`);
     console.log(`  上传数据: POST http://localhost:${PORT}/api/upload-data`);
     console.log(`  更新数据: POST http://localhost:${PORT}/api/update-data`);
+    console.log(`  保存AI职位: POST http://localhost:${PORT}/api/aijob`);
     console.log(`管理员账户: ${ADMIN_CREDENTIALS.username} / ${ADMIN_CREDENTIALS.password}`);
 }); 

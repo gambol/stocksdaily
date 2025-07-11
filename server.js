@@ -134,7 +134,7 @@ app.post('/api/admin/login', async (req, res) => {
             // 删除已使用的验证码
             captchaStore.delete(sessionId);
             
-            const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '24h' });
+            const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '365d' });
             res.json({ 
                 message: '登录成功',
                 token,

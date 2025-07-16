@@ -673,7 +673,10 @@
             await fetchAvailableDates();
             const dateParam = getQueryParam('date');
             let showDate = dateParam;
-            if (!availableDates.includes(dateParam)) {
+            if (!dateParam) {
+                // 没有date参数，默认用最新的有数据日期
+                showDate = availableDates[availableDates.length - 1];
+            } else if (!availableDates.includes(dateParam)) {
                 showDate = findClosestAvailableDate(dateParam);
             }
             if (!showDate) {

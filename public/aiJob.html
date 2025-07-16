@@ -330,7 +330,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>刚拿到融资的 AI 公司</h1>
+        <h1 id="pageTitle">正在招聘的 AI 公司</h1>
         <div class="date" id="currentDate">加载中...</div>
     </div>
 
@@ -502,6 +502,10 @@
                 </div>
             `;
 
+            // 更新页面标题
+            const pageTitle = document.getElementById('pageTitle');
+            pageTitle.textContent = data.title || '正在招聘的 AI 公司';
+            
             // 更新日期显示
             document.getElementById('currentDate').textContent = formatDate(data.date);
         }
@@ -596,7 +600,7 @@
             if (showHeader) {
                 tempContainer.innerHTML = `
                     <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(3, 17, 42, 0.1);">
-                        <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 8px;">刚拿到投资 AI 公司</h1>
+                        <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 8px;">${currentData.title || '正在招聘的 AI 公司'}</h1>
                         <p style="font-size: 14px; color: rgba(3, 17, 42, 0.6);">${formatDate(date)}</p>
                     </div>
                 `;

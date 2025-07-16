@@ -251,8 +251,8 @@ app.post('/api/upload-data', authenticateToken, upload.single('jsonFile'), async
     }
 });
 
-// 获取可用日期列表（需要认证）
-app.get('/api/available-dates', authenticateToken, async (req, res) => {
+// 获取可用日期列表（不需要认证）
+app.get('/api/available-dates', async (req, res) => {
     try {
         const files = await fs.readdir(dataDir);
         const dateFiles = files
@@ -440,6 +440,11 @@ app.delete('/api/admin/delete-aijob/:date', authenticateToken, async (req, res) 
         console.error('删除AI职位数据失败:', error);
         res.status(500).json({ error: '删除AI职位数据失败' });
     }
+});
+
+// 在所有API路由之后加上
+app.get('/news', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // 启动服务器

@@ -278,6 +278,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            text-decoration: none; /* 新增，去除下划线 */
         }
 
         .nav-btn:hover {
@@ -388,18 +389,9 @@
         <div class="divider"></div>
         
         <div class="navigation" id="navigationBar">
-            <button class="nav-btn" id="prevDay" onclick="loadPreviousDay()">
-                <i class="ri-arrow-left-line"></i>
-                前一天
-            </button>
-            <button class="nav-btn today-btn" onclick="loadTodayData()">
-                <i class="ri-calendar-line"></i>
-                今天
-            </button>
-            <button class="nav-btn" id="nextDay" onclick="loadNextDay()">
-                后一天
-                <i class="ri-arrow-right-line"></i>
-            </button>
+            <a class="nav-btn" id="prevDay" href="#"><i class="ri-arrow-left-line"></i>前一天</a>
+            <a class="nav-btn today-btn" id="todayDay" href="#"><i class="ri-calendar-line"></i>今天</a>
+            <a class="nav-btn" id="nextDay" href="#">后一天<i class="ri-arrow-right-line"></i></a>
         </div>
         
         <div class="footer">
@@ -413,6 +405,7 @@
 
     <script>
         let currentDate = '';
+        let availableDates = [];
 
         // 获取今天的日期
         function getTodayDate() {
@@ -452,7 +445,7 @@
                 updateEvents(data.importantEvents || []);
                 
                 // 更新导航按钮状态
-                updateNavigationButtons();
+                updateNavigationLinks(realDate);
                 
             } catch (error) {
                 console.error('加载数据失败:', error);
@@ -493,15 +486,70 @@
             loadDataForDate(today);
         }
 
+        async function fetchAvailableDates() {
+            const res = await fetch('/api/available-dates');
+            if (res.ok) {
+                const data = await res.json();
+                // 提取日期字符串并按时间升序排列
+                availableDates = data.map(item => item.date).sort();
+            }
+        }
+
+        function findClosestAvailableDate(targetDate) {
+            // 找到 <= targetDate 的最大日期
+            let closest = null;
+            for (let i = availableDates.length - 1; i >= 0; i--) {
+                if (availableDates[i] <= targetDate) {
+                    closest = availableDates[i];
+                    break;
+                }
+            }
+            // 如果没有比targetDate早的，返回最早的
+            return closest || availableDates[0] || null;
+        }
+
+        function getPrevAvailableDate(currentDate) {
+            const idx = availableDates.indexOf(currentDate);
+            if (idx > 0) {
+                return availableDates[idx - 1];
+            }
+            return null;
+        }
+
+        function getNextAvailableDate(currentDate) {
+            const idx = availableDates.indexOf(currentDate);
+            if (idx >= 0 && idx < availableDates.length - 1) {
+                return availableDates[idx + 1];
+            }
+            return null;
+        }
+
         // 更新导航按钮状态
-        function updateNavigationButtons() {
+        function updateNavigationLinks(currentDate) {
+            const prevDate = getPrevAvailableDate(currentDate);
+            const nextDate = getNextAvailableDate(currentDate);
             const today = getTodayDate();
+
+            // 前一天
+            const prevBtn = document.getElementById('prevDay');
+            if (prevDate) {
+                prevBtn.style.display = '';
+                prevBtn.href = `/news?date=${prevDate}`;
+            } else {
+                prevBtn.style.display = 'none';
+            }
+            // 今天
+            document.getElementById('todayDay').href = `/news?date=${today}`;
+            // 后一天
             const nextBtn = document.getElementById('nextDay');
-            
-            if (currentDate) {
-                const nextDate = addDays(currentDate, 1);
-                // 如果下一天是未来日期，禁用后一天按钮
-                nextBtn.disabled = nextDate > today;
+            if (nextDate && nextDate <= today) {
+                nextBtn.style.display = '';
+                nextBtn.href = `/news?date=${nextDate}`;
+                nextBtn.classList.remove('disabled');
+                nextBtn.style.pointerEvents = '';
+                nextBtn.style.opacity = '';
+            } else {
+                nextBtn.style.display = 'none';
             }
         }
 
@@ -614,9 +662,25 @@
             noticeElement.style.display = 'none';
         }
 
+        // 获取URL参数
+        function getQueryParam(name) {
+            const url = new URL(window.location.href);
+            return url.searchParams.get(name);
+        }
+
         // 页面加载时获取数据
-        document.addEventListener('DOMContentLoaded', () => {
-            loadData();
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchAvailableDates();
+            const dateParam = getQueryParam('date');
+            let showDate = dateParam;
+            if (!availableDates.includes(dateParam)) {
+                showDate = findClosestAvailableDate(dateParam);
+            }
+            if (!showDate) {
+                showError('没有任何可用数据');
+                return;
+            }
+            loadDataForDate(showDate);
         });
 
         // 截图功能

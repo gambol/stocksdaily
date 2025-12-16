@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>游戏节奏计时器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 禁用双击缩放 */
+        body { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+        
+        /* 报警时的闪烁动画 */
+        @keyframes flash-red {
+            0% { background-color: #ef4444; }
+            50% { background-color: #000000; }
+            100% { background-color: #ef4444; }
+        }
+        .alarm-active {
+            animation: flash-red 0.5s infinite;
+        }
+        
+        /* 进度条过渡 */
+        .progress-bar { transition: width 1s linear; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col relative overflow-hidden">
+
+    <!-- 顶部控制栏 -->
+    <div class="p-4 bg-gray-800 shadow-lg z-10 flex flex-col gap-3 sticky top-0">
+        <!-- 标题与状态 -->
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold text-yellow-500">节奏计时器</h1>
+                <div id="wake-lock-status" class="text-xs text-gray-500 flex items-center mt-1">
+                    <span class="w-2 h-2 rounded-full bg-gray-500 mr-1" id="wake-lock-dot"></span>
+                    <span id="wake-lock-text">点击屏幕激活常亮</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 按钮组 (分两行或一行取决于屏幕宽度，这里用flex-wrap) -->
+        <div class="flex gap-2">
+            <button onclick="toggleAll(false)" class="flex-1 bg-red-600 active:bg-red-700 py-2 rounded text-sm font-bold shadow">停止</button>
+            <button onclick="resetAll()" class="flex-1 bg-yellow-600 active:bg-yellow-700 py-2 rounded text-sm font-bold shadow">重置</button>
+            <button onclick="toggleAll(true)" class="flex-1 bg-green-600 active:bg-green-700 py-2 rounded text-sm font-bold shadow">全开</button>
+        </div>
+    </div>
+
+    <!-- 计时器列表容器 -->
+    <div id="timer-list" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24">
+        <!-- 计时器将通过JS插入这里 -->
+    </div>
+
+    <!-- 底部添加按钮 -->
+    <div class="fixed bottom-6 right-6 z-20">
+        <button onclick="openModal()" class="w-14 h-14 bg-blue-500 rounded-full shadow-lg flex items-center justify-center text-3xl font-bold active:scale-95 transition-transform">
+            +
+        </button>
+    </div>
+
+    <!-- 添加计时器模态框 -->
+    <div id="add-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-30 px-4">
+        <div class="bg-gray-800 p-6 rounded-xl w-full max-w-sm border border-gray-700">
+            <h2 class="text-xl mb-4 font-bold">添加新计时器</h2>
+            
+            <label class="block text-sm text-gray-400 mb-1">名称 (如: 出龙骑)</label>
+            <input type="text" id="new-name" class="w-full bg-gray-700 p-3 rounded mb-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="任务名称">
+            
+            <div class="flex space-x-2 mb-6">
+                <div class="flex-1">
+                    <label class="block text-sm text-gray-400 mb-1">分钟</label>
+                    <input type="number" id="new-min" class="w-full bg-gray-700 p-3 rounded text-white text-center" value="5">
+                </div>
+                <div class="flex-1">
+                    <label class="block text-sm text-gray-400 mb-1">秒</label>
+                    <input type="number" id="new-sec" class="w-full bg-gray-700 p-3 rounded text-white text-center" value="0">
+                </div>
+            </div>
+
+            <div class="flex space-x-3">
+                <button onclick="closeModal()" class="flex-1 py-3 bg-gray-600 rounded font-bold">取消</button>
+                <button onclick="addTimer()" class="flex-1 py-3 bg-blue-600 rounded font-bold">确认添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 报警全屏覆盖层 -->
+    <div id="alarm-overlay" class="fixed inset-0 bg-red-600 hidden z-50 flex flex-col items-center justify-center text-center p-6" onclick="stopAlarm()">
+        <h1 id="alarm-text" class="text-5xl font-black text-white mb-4 drop-shadow-md">时间到!</h1>
+        <p class="text-xl text-white/90">点击屏幕关闭提示</p>
+        <div class="mt-8 text-sm text-white/70">15秒后自动关闭</div>
+    </div>
+
+    <script>
+        // --- 数据结构与初始化 ---
+        let timers = [];
+        let intervalId = null;
+        let alarmTimeoutId = null;
+        let audioCtx = null;
+        let wakeLock = null; 
+
+        // 从本地存储加载
+        function loadTimers() {
+            const saved = localStorage.getItem('gameTimers');
+            if (saved) {
+                timers = JSON.parse(saved);
+                timers.forEach(t => {
+                    t.isRunning = false;
+                }); 
+                renderTimers();
+            }
+        }
+
+        function saveTimers() {
+            localStorage.setItem('gameTimers', JSON.stringify(timers));
+        }
+
+        // --- 屏幕常亮逻辑 ---
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    updateWakeLockStatus(true);
+                    wakeLock.addEventListener('release', () => {
+                        updateWakeLockStatus(false);
+                    });
+                } else {
+                    document.getElementById('wake-lock-text').innerText = "浏览器不支持常亮";
+                }
+            } catch (err) {
+                updateWakeLockStatus(false);
+            }
+        }
+
+        function updateWakeLockStatus(isActive) {
+            const dot = document.getElementById('wake-lock-dot');
+            const text = document.getElementById('wake-lock-text');
+            if (isActive) {
+                dot.classList.remove('bg-gray-500');
+                dot.classList.add('bg-green-500', 'shadow-[0_0_8px_rgba(34,197,94,0.8)]');
+                text.innerText = "屏幕常亮已开启";
+                text.classList.add('text-green-400');
+            } else {
+                dot.classList.add('bg-gray-500');
+                dot.classList.remove('bg-green-500', 'shadow-[0_0_8px_rgba(34,197,94,0.8)]');
+                text.innerText = "点击激活常亮";
+                text.classList.remove('text-green-400');
+            }
+        }
+
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        });
+
+        document.addEventListener('click', () => {
+            if (!wakeLock) requestWakeLock();
+        });
+
+        // --- 音频处理 ---
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playBeep() {
+            if (!audioCtx) initAudio();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); 
+            oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        }
+
+        // --- 核心逻辑 ---
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function renderTimers() {
+            const list = document.getElementById('timer-list');
+            list.innerHTML = '';
+
+            timers.forEach((timer, index) => {
+                const percent = (timer.remaining / timer.duration) * 100;
+                
+                const div = document.createElement('div');
+                div.className = `bg-gray-800 rounded-lg p-4 border-l-4 relative overflow-hidden ${timer.isRunning ? 'border-green-500' : 'border-gray-600'}`;
+                
+                div.innerHTML = `
+                    <div class="absolute top-0 left-0 h-full bg-gray-700/50 pointer-events-none progress-bar" style="width: ${percent}%; z-index: 0;"></div>
+                    
+                    <div class="relative z-10 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-lg">${timer.name}</h3>
+                            <div class="text-2xl font-mono text-gray-200">${formatTime(timer.remaining)}</div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="toggleTimer(${index})" class="w-10 h-10 rounded-full flex items-center justify-center ${timer.isRunning ? 'bg-yellow-600' : 'bg-green-600'}">
+                                ${timer.isRunning ? '⏸' : '▶'}
+                            </button>
+                            <button onclick="resetTimer(${index})" class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
+                                ↺
+                            </button>
+                            <button onclick="deleteTimer(${index})" class="w-10 h-10 rounded-full bg-red-900/50 text-red-500 flex items-center justify-center">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function startGlobalLoop() {
+            if (intervalId) return;
+            intervalId = setInterval(() => {
+                let needsRender = false;
+                
+                timers.forEach(timer => {
+                    if (timer.isRunning && timer.remaining > 0) {
+                        timer.remaining--;
+                        needsRender = true;
+
+                        if (timer.remaining === 0) {
+                            timer.isRunning = false;
+                            triggerAlarm(timer);
+                        }
+                    }
+                });
+
+                if (needsRender) {
+                    renderTimers();
+                    saveTimers(); 
+                }
+            }, 1000);
+        }
+
+        // --- 操作函数 ---
+
+        function addTimer() {
+            const name = document.getElementById('new-name').value || '未命名任务';
+            const min = parseInt(document.getElementById('new-min').value) || 0;
+            const sec = parseInt(document.getElementById('new-sec').value) || 0;
+            const totalSec = (min * 60) + sec;
+            if (totalSec <= 0) return alert("时间必须大于0");
+            timers.push({
+                name: name,
+                duration: totalSec,
+                remaining: totalSec,
+                isRunning: false
+            });
+            saveTimers();
+            renderTimers();
+            closeModal();
+            initAudio();
+            requestWakeLock();
+        }
+
+        function deleteTimer(index) {
+            if(confirm('确定删除这个计时器吗?')) {
+                timers.splice(index, 1);
+                saveTimers();
+                renderTimers();
+            }
+        }
+
+        function toggleTimer(index) {
+            initAudio();
+            requestWakeLock();
+            timers[index].isRunning = !timers[index].isRunning;
+            saveTimers();
+            renderTimers();
+        }
+
+        function resetTimer(index) {
+            timers[index].isRunning = false;
+            timers[index].remaining = timers[index].duration;
+            saveTimers();
+            renderTimers();
+        }
+
+        function toggleAll(shouldStart) {
+            initAudio();
+            requestWakeLock();
+            timers.forEach(t => {
+                if (shouldStart && t.remaining > 0) {
+                    t.isRunning = true;
+                } else if (!shouldStart) {
+                    t.isRunning = false;
+                }
+            });
+            saveTimers();
+            renderTimers();
+        }
+
+        // 新增：重置所有计时器
+        function resetAll() {
+            if(confirm('确定要重置所有任务吗？\n所有进度将归零并停止。')) {
+                stopAlarm(); // 如果正在报警，先关掉
+                timers.forEach(t => {
+                    t.isRunning = false;
+                    t.remaining = t.duration;
+                });
+                saveTimers();
+                renderTimers();
+            }
+        }
+
+        // --- 报警系统 ---
+
+        function triggerAlarm(timer) {
+            const overlay = document.getElementById('alarm-overlay');
+            const text = document.getElementById('alarm-text');
+            
+            text.innerText = `${timer.name} 时间到!`;
+            overlay.classList.remove('hidden');
+            overlay.classList.add('alarm-active'); 
+            
+            let beepCount = 0;
+            const beepInterval = setInterval(() => {
+                playBeep();
+                beepCount++;
+                if(beepCount > 5) clearInterval(beepInterval);
+            }, 800);
+            playBeep(); 
+
+            if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500]);
+
+            if (alarmTimeoutId) clearTimeout(alarmTimeoutId);
+            alarmTimeoutId = setTimeout(() => {
+                stopAlarm();
+            }, 15000);
+        }
+
+        function stopAlarm() {
+            const overlay = document.getElementById('alarm-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('alarm-active');
+            if (alarmTimeoutId) clearTimeout(alarmTimeoutId);
+        }
+
+        function openModal() {
+            document.getElementById('add-modal').classList.remove('hidden');
+        }
+        function closeModal() {
+            document.getElementById('add-modal').classList.add('hidden');
+        }
+
+        loadTimers();
+        startGlobalLoop();
+
+    </script>
+</body>
+</html>

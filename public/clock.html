@@ -58,10 +58,10 @@
         </button>
     </div>
 
-    <!-- 添加计时器模态框 -->
+    <!-- 添加/编辑计时器模态框 -->
     <div id="add-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-30 px-4">
         <div class="bg-gray-800 p-6 rounded-xl w-full max-w-sm border border-gray-700">
-            <h2 class="text-xl mb-4 font-bold">添加新计时器</h2>
+            <h2 id="modal-title" class="text-xl mb-4 font-bold">添加新计时器</h2>
             
             <label class="block text-sm text-gray-400 mb-1">名称 (如: 出龙骑)</label>
             <input type="text" id="new-name" class="w-full bg-gray-700 p-3 rounded mb-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="任务名称">
@@ -79,7 +79,7 @@
 
             <div class="flex space-x-3">
                 <button onclick="closeModal()" class="flex-1 py-3 bg-gray-600 rounded font-bold">取消</button>
-                <button onclick="addTimer()" class="flex-1 py-3 bg-blue-600 rounded font-bold">确认添加</button>
+                <button id="modal-submit-btn" onclick="addTimer()" class="flex-1 py-3 bg-blue-600 rounded font-bold">确认添加</button>
             </div>
         </div>
     </div>
@@ -97,7 +97,8 @@
         let intervalId = null;
         let alarmTimeoutId = null;
         let audioCtx = null;
-        let wakeLock = null; 
+        let wakeLock = null;
+        let editingIndex = null; // 当前正在编辑的计时器索引，null表示添加模式 
 
         // 从本地存储加载
         function loadTimers() {
@@ -216,6 +217,9 @@
                             <button onclick="resetTimer(${index})" class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
                                 ↺
                             </button>
+                            <button onclick="editTimer(${index})" class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                                ✎
+                            </button>
                             <button onclick="deleteTimer(${index})" class="w-10 h-10 rounded-full bg-red-900/50 text-red-500 flex items-center justify-center">
                                 ✕
                             </button>
@@ -258,12 +262,32 @@
             const sec = parseInt(document.getElementById('new-sec').value) || 0;
             const totalSec = (min * 60) + sec;
             if (totalSec <= 0) return alert("时间必须大于0");
-            timers.push({
-                name: name,
-                duration: totalSec,
-                remaining: totalSec,
-                isRunning: false
-            });
+            
+            if (editingIndex !== null) {
+                // 编辑模式：更新现有计时器
+                const timer = timers[editingIndex];
+                const wasRunning = timer.isRunning;
+                const oldRemaining = timer.remaining;
+                
+                timer.name = name;
+                timer.duration = totalSec;
+                // 如果计时器正在运行，保持运行状态；否则重置剩余时间
+                if (wasRunning && oldRemaining > 0) {
+                    // 保持当前剩余时间，但不超过新的总时长
+                    timer.remaining = Math.min(oldRemaining, totalSec);
+                } else {
+                    timer.remaining = totalSec;
+                }
+            } else {
+                // 添加模式：创建新计时器
+                timers.push({
+                    name: name,
+                    duration: totalSec,
+                    remaining: totalSec,
+                    isRunning: false
+                });
+            }
+            
             saveTimers();
             renderTimers();
             closeModal();
@@ -272,7 +296,8 @@
         }
 
         function deleteTimer(index) {
-            if(confirm('确定删除这个计时器吗?')) {
+            const timerName = timers[index].name;
+            if(confirm(`要删除"${timerName}"这个定时器吗?`)) {
                 timers.splice(index, 1);
                 saveTimers();
                 renderTimers();
@@ -355,9 +380,30 @@
         }
 
         function openModal() {
+            editingIndex = null;
+            document.getElementById('modal-title').innerText = '添加新计时器';
+            document.getElementById('modal-submit-btn').innerText = '确认添加';
+            document.getElementById('modal-submit-btn').setAttribute('onclick', 'addTimer()');
+            document.getElementById('new-name').value = '';
+            document.getElementById('new-min').value = '5';
+            document.getElementById('new-sec').value = '0';
             document.getElementById('add-modal').classList.remove('hidden');
         }
+        
+        function editTimer(index) {
+            editingIndex = index;
+            const timer = timers[index];
+            document.getElementById('modal-title').innerText = '编辑计时器';
+            document.getElementById('modal-submit-btn').innerText = '确认修改';
+            document.getElementById('modal-submit-btn').setAttribute('onclick', 'addTimer()');
+            document.getElementById('new-name').value = timer.name;
+            document.getElementById('new-min').value = Math.floor(timer.duration / 60);
+            document.getElementById('new-sec').value = timer.duration % 60;
+            document.getElementById('add-modal').classList.remove('hidden');
+        }
+        
         function closeModal() {
+            editingIndex = null;
             document.getElementById('add-modal').classList.add('hidden');
         }
 

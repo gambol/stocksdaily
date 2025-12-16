@@ -25,7 +25,8 @@ logs
 .env.production.local
 
 # Data files
-data/
+
+
 *.json.bak
 
 # IDE

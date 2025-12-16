@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 新闻</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="apple-touch-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'AlimamaShuHeiTi';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/AlimamaShuHeiTi-Bold.otf') format('opentype');
+            font-weight: bold;
+        }
+        @font-face {
+            font-family: 'MiSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Regular.ttf') format('truetype');
+            font-weight: normal;
+        }
+        @font-face {
+            font-family: 'MiSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+        }
+        @font-face {
+            font-family: 'MiSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Bold.ttf') format('truetype');
+            font-weight: bold;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'MiSans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #57bc60 0%, #4a9c52 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-family: 'AlimamaShuHeiTi', sans-serif;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .back-link {
+            color: #57bc60;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .json-textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            resize: vertical;
+            line-height: 1.4;
+        }
+        
+        .json-textarea:focus {
+            outline: none;
+            border-color: #57bc60;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 15px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #57bc60 0%, #4a9c52 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(87, 188, 96, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #e1e5e9;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .alert-success {
+            background-color: rgba(87, 188, 96, 0.1);
+            border: 1px solid rgba(87, 188, 96, 0.2);
+            color: #4a9c52;
+        }
+        
+        .alert-error {
+            background-color: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            color: #d70015;
+        }
+        
+        .preview-section {
+            margin-top: 40px;
+            border-top: 1px solid #e1e5e9;
+            padding-top: 30px;
+        }
+        
+        .preview-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .preview-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+        
+        .preview-card {
+            min-width: 300px;
+            height: 400px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .preview-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .generate-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #57bc60;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(87, 188, 96, 0.3);
+            transition: transform 0.2s;
+        }
+        
+        .generate-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        /* 隐藏生成按钮的样式 */
+        .screenshot-mode .generate-btn {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI 新闻图片生成</h1>
+            <p>生成小红书风格的AI新闻图片</p>
+        </div>
+        
+        <div class="content">
+            <a href="/" class="back-link">← 返回首页</a>
+            
+            <h2 style="margin-bottom: 25px;">输入新闻数据</h2>
+            <div id="alert" class="alert" style="display: none;"></div>
+            
+            <form onsubmit="handleSubmit(event)">
+                <div class="form-group">
+                    <label class="form-label">JSON新闻数据</label>
+                    <textarea id="jsonContent" class="json-textarea" placeholder="请粘贴或输入JSON新闻数据..." required></textarea>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="formatJSON()">
+                        <i class="ri-indent-increase"></i>
+                        格式化JSON
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="loadSampleData()">
+                        <i class="ri-file-text-line"></i>
+                        加载示例
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ri-save-line"></i>
+                        生成图片
+                    </button>
+                </div>
+            </form>
+            
+            <div class="preview-section">
+                <div class="preview-title">图片预览</div>
+                <div id="previewContainer" class="preview-container">
+                    <div class="preview-card">
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999;">
+                            <i class="ri-image-line" style="font-size: 48px;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="generate-btn" onclick="generateAllImages()" title="生成所有图片">
+        <i class="ri-camera-line"></i>
+    </button>
+
+    <script>
+        let currentData = null;
+        
+        // 格式化JSON
+        function formatJSON() {
+            const textarea = document.getElementById('jsonContent');
+            try {
+                const json = JSON.parse(textarea.value);
+                textarea.value = JSON.stringify(json, null, 2);
+                showAlert('JSON格式化成功！', 'success');
+            } catch (error) {
+                showAlert('JSON格式错误，无法格式化', 'error');
+            }
+        }
+        
+        // 加载示例数据
+        function loadSampleData() {
+            const sampleData = {
+                "date": "2025-07-04",
+                "key_news": [
+                    {
+                        "title": "欧盟坚持按计划推进AI法案实施，拒绝推迟",
+                        "summary": "欧盟委员会今日重申，将严格按照既定法律时间表推进人工智能法案（AI Act）的实施，拒绝包括谷歌母公司Alphabet、Meta等多家科技巨头及部分成员国提出的延期请求。相关规定已于2月生效，通用AI模型的合规义务将于今年8月启动，高风险模型的要求则将在2026年8月生效。欧盟此举旨在强化AI监管，保障技术安全与市场公平，尽管部分企业担忧合规成本和行业竞争力。"
+                    },
+                    {
+                        "title": "Meta重金挖角AI顶尖人才，超级智能竞赛升级",
+                        "summary": "Meta宣布聘请Scale AI创始人Alexandr Wang为首任首席AI官，并与前GitHub CEO Nat Friedman共同领导新成立的超级智能实验室。Meta还高薪挖角OpenAI、谷歌和Anthropic的多名AI研究员，投入140亿美元加速AI基础模型和超级智能研发。行业顶级AI人才成为稀缺资源，科技巨头正展开激烈人才争夺战，推动AI领域快速演进。"
+                    }
+                ]
+            };
+            
+            document.getElementById('jsonContent').value = JSON.stringify(sampleData, null, 2);
+            showAlert('示例数据已加载！', 'success');
+        }
+        
+        // 处理提交
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            const jsonContent = document.getElementById('jsonContent').value.trim();
+            
+            if (!jsonContent) {
+                showAlert('请输入JSON数据', 'error');
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(jsonContent);
+                
+                if (!data.key_news || !Array.isArray(data.key_news)) {
+                    showAlert('JSON格式不正确，缺少key_news数组', 'error');
+                    return;
+                }
+                
+                currentData = data;
+                showAlert('数据验证成功！点击右下角按钮生成图片', 'success');
+                
+            } catch (error) {
+                showAlert('JSON格式错误，请检查数据格式', 'error');
+            }
+        }
+        
+        // 生成所有图片
+        async function generateAllImages() {
+            if (!currentData) {
+                showAlert('请先输入并验证数据', 'error');
+                return;
+            }
+            
+            try {
+                // 生成首页
+                await generateHomePage();
+                
+                // 生成新闻卡片
+                for (let i = 0; i < currentData.key_news.length; i++) {
+                    await generateNewsCard(i);
+                }
+                
+                showAlert('所有图片生成完成！', 'success');
+            } catch (error) {
+                showAlert('生成图片失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 生成首页
+        async function generateHomePage() {
+            const homePage = createHomePageHTML(currentData.date);
+            await captureAndDownload(homePage, `AI新闻首页_${currentData.date}.jpg`);
+        }
+        
+        // 生成新闻卡片
+        async function generateNewsCard(index) {
+            const news = currentData.key_news[index];
+            const cardHTML = createNewsCardHTML(news, index + 1);
+            await captureAndDownload(cardHTML, `AI新闻卡片${index + 1}_${currentData.date}.jpg`);
+        }
+        
+        // 创建首页HTML
+        function createHomePageHTML(date) {
+            return `
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>AI 新闻</title>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+                    <style>
+                        @font-face {
+                            font-family: 'AlimamaShuHeiTi';
+                            src: url('https://assets-persist.lovart.ai/agent-static-assets/AlimamaShuHeiTi-Bold.otf') format('opentype');
+                            font-weight: bold;
+                        }
+                        @font-face {
+                            font-family: 'MiSans';
+                            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Medium.ttf') format('truetype');
+                            font-weight: 500;
+                        }
+                        
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        
+                        body {
+                            width: 1080px;
+                            height: 1440px;
+                            background-color: white;
+                            color: rgb(3, 17, 42);
+                            font-family: 'MiSans', sans-serif;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            overflow: hidden;
+                            position: relative;
+                        }
+                        
+                        .card {
+                            width: 90%;
+                            height: 90%;
+                            background-color: white;
+                            border-radius: 40px;
+                            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            position: relative;
+                            overflow: hidden;
+                        }
+                        
+                        .decoration {
+                            position: absolute;
+                            width: 100%;
+                            height: 100%;
+                            pointer-events: none;
+                            z-index: 1;
+                        }
+                        
+                        .circle {
+                            position: absolute;
+                            border-radius: 50%;
+                            background-color: rgba(87, 188, 96, 0.1);
+                        }
+                        
+                        .circle-1 {
+                            width: 500px;
+                            height: 500px;
+                            top: -150px;
+                            right: -150px;
+                        }
+                        
+                        .circle-2 {
+                            width: 300px;
+                            height: 300px;
+                            bottom: -100px;
+                            left: -100px;
+                        }
+                        
+                        .content {
+                            position: relative;
+                            z-index: 2;
+                            width: 80%;
+                            text-align: center;
+                        }
+                        
+                        .title-container {
+                            margin-bottom: 60px;
+                            position: relative;
+                        }
+                        
+                        .title {
+                            font-family: 'AlimamaShuHeiTi', sans-serif;
+                            font-size: 180px;
+                            font-weight: bold;
+                            letter-spacing: -2px;
+                            margin-bottom: 40px;
+                            position: relative;
+                            display: inline-block;
+                        }
+                        
+                        .title-highlight {
+                            position: relative;
+                            z-index: 2;
+                        }
+                        
+                        .title-highlight::after {
+                            content: "";
+                            position: absolute;
+                            bottom: 20px;
+                            left: 0;
+                            width: 100%;
+                            height: 30px;
+                            background-color: rgba(87, 188, 96, 0.3);
+                            z-index: -1;
+                            transform: skewX(-5deg);
+                        }
+                        
+                        .ai-text {
+                            color: rgb(87, 188, 96);
+                            text-shadow: 2px 2px 0px rgba(87, 188, 96, 0.2);
+                        }
+                        
+                        .date {
+                            font-size: 60px;
+                            font-weight: 500;
+                            color: rgb(3, 17, 42);
+                            opacity: 0.8;
+                            letter-spacing: 2px;
+                        }
+                        
+                        .icon-container {
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            width: 100%;
+                            height: 100%;
+                            z-index: -1;
+                            opacity: 0.03;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+                        
+                        .icon-container i {
+                            font-size: 600px;
+                            color: rgb(3, 17, 42);
+                        }
+                        
+                        .decorative-dots {
+                            position: absolute;
+                            width: 100%;
+                            height: 100%;
+                        }
+                        
+                        .dot {
+                            position: absolute;
+                            width: 10px;
+                            height: 10px;
+                            border-radius: 50%;
+                            background-color: rgb(87, 188, 96);
+                        }
+                        
+                        .dot:nth-child(1) { top: 10%; left: 5%; opacity: 0.6; }
+                        .dot:nth-child(2) { top: 20%; right: 8%; opacity: 0.4; }
+                        .dot:nth-child(3) { bottom: 15%; left: 12%; opacity: 0.5; }
+                        .dot:nth-child(4) { bottom: 25%; right: 15%; opacity: 0.7; }
+                        
+                        .accent-bar {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 15px;
+                            background-color: rgb(87, 188, 96);
+                            border-top-left-radius: 40px;
+                            border-top-right-radius: 40px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="card">
+                        <div class="accent-bar"></div>
+                        
+                        <div class="decoration">
+                            <div class="circle circle-1"></div>
+                            <div class="circle circle-2"></div>
+                            <div class="decorative-dots">
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="icon-container">
+                            <i class="ri-ai-generate"></i>
+                        </div>
+                        
+                        <div class="content">
+                            <div class="title-container">
+                                <h1 class="title">
+                                    <span class="ai-text">AI</span> <span class="title-highlight">新闻</span>
+                                </h1>
+                            </div>
+                            <div class="date">${date}</div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+        
+        // 创建新闻卡片HTML
+        function createNewsCardHTML(news, number) {
+            return `
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>AI新闻卡片</title>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+                    <style>
+                        @font-face {
+                            font-family: 'AlimamaShuHeiTi';
+                            src: url('https://assets-persist.lovart.ai/agent-static-assets/AlimamaShuHeiTi-Bold.otf') format('opentype');
+                            font-weight: bold;
+                        }
+                        @font-face {
+                            font-family: 'MiSans';
+                            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Regular.ttf') format('truetype');
+                            font-weight: normal;
+                        }
+                        @font-face {
+                            font-family: 'MiSans';
+                            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Medium.ttf') format('truetype');
+                            font-weight: 500;
+                        }
+                        @font-face {
+                            font-family: 'MiSans';
+                            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Bold.ttf') format('truetype');
+                            font-weight: bold;
+                        }
+                        
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        
+                        body {
+                            width: 1080px;
+                            height: 1440px;
+                            background-color: #ffffff;
+                            font-family: 'MiSans', sans-serif;
+                            color: rgb(3, 17, 42);
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            overflow: hidden;
+                        }
+                        
+                        .card {
+                            width: 960px;
+                            height: 1280px;
+                            background-color: #ffffff;
+                            border-radius: 24px;
+                            box-shadow: 0 20px 60px rgba(3, 17, 42, 0.08);
+                            padding: 60px;
+                            position: relative;
+                            overflow: hidden;
+                        }
+                        
+                        .accent-corner {
+                            width: 0;
+                            height: 0;
+                            border-top: 180px solid rgb(87, 188, 96);
+                            border-right: 180px solid transparent;
+                            background: none;
+                            clip-path: none;
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                        }
+                        
+                        .news-tag {
+                            display: inline-block;
+                            background-color: rgba(87, 188, 96, 0.15);
+                            color: rgb(87, 188, 96);
+                            font-size: 32px;
+                            font-weight: 500;
+                            padding: 12px 28px;
+                            border-radius: 40px;
+                            margin-bottom: 40px;
+                            margin-left: 40px;
+                        }
+                        
+                        .title-container {
+                            margin-bottom: 60px;
+                            position: relative;
+                            z-index: 1;
+                        }
+                        
+                        .title {
+                            font-family: 'AlimamaShuHeiTi', sans-serif;
+                            font-size: 84px;
+                            line-height: 1.2;
+                            margin-bottom: 30px;
+                            letter-spacing: -1px;
+                        }
+                        
+                        .highlight {
+                            color: rgb(87, 188, 96);
+                            position: relative;
+                            display: inline-block;
+                        }
+                        
+                        .highlight::after {
+                            content: '';
+                            position: absolute;
+                            bottom: 8px;
+                            left: 0;
+                            width: 100%;
+                            height: 12px;
+                            background-color: rgba(87, 188, 96, 0.2);
+                            z-index: -1;
+                            border-radius: 6px;
+                        }
+                        
+                        .summary {
+                            font-size: 40px;
+                            line-height: 1.6;
+                            font-weight: 400;
+                            margin-bottom: 60px;
+                            letter-spacing: 0.5px;
+                        }
+                        
+                        .key-point {
+                            font-weight: 500;
+                            color: rgb(3, 17, 42);
+                            position: relative;
+                            display: inline;
+                            background: linear-gradient(transparent 60%, rgba(87, 188, 96, 0.15) 40%);
+                        }
+                        
+                        .bottom-decoration {
+                            position: absolute;
+                            bottom: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 16px;
+                            background-color: rgb(87, 188, 96);
+                        }
+                        
+                        .corner-icon {
+                            position: absolute;
+                            bottom: 40px;
+                            right: 40px;
+                            font-size: 60px;
+                            color: rgb(87, 188, 96);
+                        }
+                        
+                        .news-number {
+                            position: absolute;
+                            top: 40px;
+                            right: 40px;
+                            font-family: 'AlimamaShuHeiTi', sans-serif;
+                            font-size: 120px;
+                            color: rgba(87, 188, 96, 0.1);
+                            font-weight: bold;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="card">
+                        <div class="accent-corner"></div>
+                        <div class="news-number">${String(number).padStart(2, '0')}</div>
+                        <div class="news-tag">AI 新闻</div>
+                        
+                        <div class="title-container">
+                            <h1 class="title">${news.title}</h1>
+                        </div>
+                        
+                        <div class="summary">${news.summary}</div>
+                        
+                        <div class="bottom-decoration"></div>
+                        <div class="corner-icon">
+                            <i class="ri-ai-generate"></i>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+        
+        // 截图并下载
+        async function captureAndDownload(htmlContent, filename) {
+            // 创建临时iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'absolute';
+            iframe.style.left = '-9999px';
+            iframe.style.top = '-9999px';
+            iframe.style.width = '1080px';
+            iframe.style.height = '1440px';
+            iframe.style.border = 'none';
+            document.body.appendChild(iframe);
+            
+            // 写入HTML内容
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(htmlContent);
+            doc.close();
+            
+            // 等待字体和图片加载
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            try {
+                // 使用html2canvas截图
+                const canvas = await html2canvas(iframe.contentDocument.body, {
+                    width: 1080,
+                    height: 1440,
+                    scale: 1,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                });
+                
+                // 转换为blob并下载
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 'image/jpeg', 0.9);
+                
+            } catch (error) {
+                console.error('截图失败:', error);
+                showAlert('截图失败: ' + error.message, 'error');
+            } finally {
+                // 清理iframe
+                document.body.removeChild(iframe);
+            }
+        }
+        
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+          

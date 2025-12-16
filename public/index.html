@@ -4,27 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>美股每日总结</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="apple-touch-icon" href="/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        @font-face {
-            font-family: 'MiSans-Bold';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Bold.ttf') format('truetype');
-            font-weight: bold;
-            font-style: normal;
-        }
-        @font-face {
-            font-family: 'MiSans-Medium';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Medium.ttf') format('truetype');
-            font-weight: 500;
-            font-style: normal;
-        }
-        @font-face {
-            font-family: 'MiSans-Regular';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Regular.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
         
         * {
             margin: 0;
@@ -33,7 +19,7 @@
         }
         
         body {
-            font-family: 'MiSans-Regular', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background-color: rgb(255, 255, 255);
             color: rgb(0, 17, 44);
             width: 390px;
@@ -63,7 +49,7 @@
         }
         
         .title {
-            font-family: 'MiSans-Bold', sans-serif;
+            font-weight: bold;
             font-size: 22px;
             margin-bottom: 8px;
         }
@@ -78,7 +64,7 @@
         }
         
         .section-title {
-            font-family: 'MiSans-Medium', sans-serif;
+            font-weight: 500;
             font-size: 18px;
             margin: 25px 0 15px;
             display: flex;
@@ -113,21 +99,21 @@
         }
         
         .index-name {
-            font-family: 'MiSans-Medium', sans-serif;
+            font-weight: 500;
             font-size: 14px;
             margin-bottom: 10px;
             color: rgba(0, 17, 44, 0.8);
         }
         
         .index-value {
-            font-family: 'MiSans-Bold', sans-serif;
+            font-weight: bold;
             font-size: 24px;
             margin-bottom: 5px;
         }
         
         .index-change {
+            font-weight: 500;
             font-size: 16px;
-            font-family: 'MiSans-Medium', sans-serif;
         }
         
         .increase {
@@ -148,7 +134,7 @@
         }
         
         .analysis-title {
-            font-family: 'MiSans-Medium', sans-serif;
+            font-weight: 500;
             font-size: 16px;
             margin-bottom: 10px;
             color: rgb(0, 17, 44);
@@ -176,8 +162,8 @@
         .event-card {
             background-color: #fff;
             border-radius: 12px;
-            padding: 18px;
-            margin-bottom: 15px;
+            padding: 13px;
+            margin-bottom: 13px;
             box-shadow: 0 2px 8px rgba(0, 17, 44, 0.05);
             border-left: 3px solid rgb(12, 191, 83);
             transition: transform 0.2s;
@@ -188,7 +174,7 @@
         }
         
         .event-title {
-            font-family: 'MiSans-Medium', sans-serif;
+            font-weight: 500;
             font-size: 15px;
             line-height: 1.5;
             display: flex;
@@ -250,23 +236,6 @@
             transform: scale(1.1);
         }
 
-        .admin-link {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: rgba(0, 17, 44, 0.8);
-            color: white;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            transition: background-color 0.2s;
-        }
-
-        .admin-link:hover {
-            background-color: rgb(0, 17, 44);
-        }
-
         .navigation {
             display: flex;
             justify-content: space-between;
@@ -281,7 +250,7 @@
             padding: 12px 15px;
             border: 1px solid rgba(0, 17, 44, 0.2);
             border-radius: 10px;
-            font-family: 'MiSans-Medium', sans-serif;
+            font-weight: 500;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
@@ -291,6 +260,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            text-decoration: none; /* 新增，去除下划线 */
         }
 
         .nav-btn:hover {
@@ -325,42 +295,26 @@
             box-shadow: none;
         }
 
-        .screenshot-section {
-            text-align: center;
+        .data-notice {
+            background-color: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            color: rgb(255, 152, 0);
+            padding: 12px 15px;
+            border-radius: 8px;
             margin: 15px 0;
-        }
-
-        .screenshot-btn {
-            padding: 12px 25px;
-            background-color: rgb(255, 149, 0);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-family: 'MiSans-Medium', sans-serif;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
+            font-size: 13px;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
-            margin: 0 auto;
-            box-shadow: 0 2px 8px rgba(255, 149, 0, 0.3);
+            font-weight: 500;
         }
 
-        .screenshot-btn:hover {
-            background-color: rgb(230, 134, 0);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4);
-        }
-
-        .screenshot-btn:active {
-            transform: translateY(0);
+        .data-notice i {
+            font-size: 16px;
         }
 
         /* 截图时隐藏的元素 */
         .screenshot-mode .navigation,
-        .screenshot-mode .screenshot-section,
         .screenshot-mode .refresh-btn {
             display: none !important;
         }
@@ -377,6 +331,12 @@
                 <i class="ri-time-line"></i>
                 <span id="updateTime">正在加载...</span>
             </div>
+        </div>
+        
+        <!-- 数据提示信息 -->
+        <div id="dataNotice" class="data-notice" style="display: none;">
+            <i class="ri-information-line"></i>
+            <span id="dataNoticeText"></span>
         </div>
         
         <div class="section-title">
@@ -411,25 +371,9 @@
         <div class="divider"></div>
         
         <div class="navigation" id="navigationBar">
-            <button class="nav-btn" id="prevDay" onclick="loadPreviousDay()">
-                <i class="ri-arrow-left-line"></i>
-                前一天
-            </button>
-            <button class="nav-btn today-btn" onclick="loadTodayData()">
-                <i class="ri-calendar-line"></i>
-                今天
-            </button>
-            <button class="nav-btn" id="nextDay" onclick="loadNextDay()">
-                后一天
-                <i class="ri-arrow-right-line"></i>
-            </button>
-        </div>
-        
-        <div class="screenshot-section">
-            <button class="screenshot-btn" onclick="captureScreenshot()">
-                <i class="ri-camera-line"></i>
-                生成图片
-            </button>
+            <a class="nav-btn" id="prevDay" href="#"><i class="ri-arrow-left-line"></i>前一天</a>
+            <a class="nav-btn today-btn" id="todayDay" href="#"><i class="ri-calendar-line"></i>今天</a>
+            <a class="nav-btn" id="nextDay" href="#">后一天<i class="ri-arrow-right-line"></i></a>
         </div>
         
         <div class="footer">
@@ -437,12 +381,13 @@
         </div>
     </div>
 
-    <button class="refresh-btn" id="refreshBtn" onclick="loadData()" title="刷新数据">
-        <i class="ri-refresh-line"></i>
+    <button class="refresh-btn" id="refreshBtn" onclick="captureScreenshot()" title="生成图片">
+        <i class="ri-camera-line"></i>
     </button>
 
     <script>
         let currentDate = '';
+        let availableDates = [];
 
         // 获取今天的日期
         function getTodayDate() {
@@ -456,18 +401,33 @@
                 currentDate = date;
                 const response = await fetch(`/api/data/${date}`);
                 if (!response.ok) {
+                    if (response.status === 404) {
+                        // 没有找到任何可用数据
+                        const errorData = await response.json();
+                        showError(errorData.message || '没有找到任何可用数据');
+                        return;
+                    }
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
                 
-                // 更新页面内容
-                updateUpdateTime(data.date || date);
+                // 实际数据日期
+                const realDate = data.originalDate || data.date || date;
+                // 检查是否使用了上一个可用数据
+                if (data.originalDate && data.originalDate !== date) {
+                    showDataNotice(`当前显示的是 ${data.originalDate} 的数据（${date} 暂无数据）`);
+                } else {
+                    hideDataNotice();
+                }
+                
+                // 更新页面内容，全部用实际数据日期
+                updateUpdateTime(realDate);
                 updateIndexCards(data.indices || []);
                 updateAnalysis(data.marketAnalysis || []);
                 updateEvents(data.importantEvents || []);
                 
                 // 更新导航按钮状态
-                updateNavigationButtons();
+                updateNavigationLinks(realDate);
                 
             } catch (error) {
                 console.error('加载数据失败:', error);
@@ -508,15 +468,70 @@
             loadDataForDate(today);
         }
 
+        async function fetchAvailableDates() {
+            const res = await fetch('/api/available-dates');
+            if (res.ok) {
+                const data = await res.json();
+                // 提取日期字符串并按时间升序排列
+                availableDates = data.map(item => item.date).sort();
+            }
+        }
+
+        function findClosestAvailableDate(targetDate) {
+            // 找到 <= targetDate 的最大日期
+            let closest = null;
+            for (let i = availableDates.length - 1; i >= 0; i--) {
+                if (availableDates[i] <= targetDate) {
+                    closest = availableDates[i];
+                    break;
+                }
+            }
+            // 如果没有比targetDate早的，返回最早的
+            return closest || availableDates[0] || null;
+        }
+
+        function getPrevAvailableDate(currentDate) {
+            const idx = availableDates.indexOf(currentDate);
+            if (idx > 0) {
+                return availableDates[idx - 1];
+            }
+            return null;
+        }
+
+        function getNextAvailableDate(currentDate) {
+            const idx = availableDates.indexOf(currentDate);
+            if (idx >= 0 && idx < availableDates.length - 1) {
+                return availableDates[idx + 1];
+            }
+            return null;
+        }
+
         // 更新导航按钮状态
-        function updateNavigationButtons() {
+        function updateNavigationLinks(currentDate) {
+            const prevDate = getPrevAvailableDate(currentDate);
+            const nextDate = getNextAvailableDate(currentDate);
             const today = getTodayDate();
+
+            // 前一天
+            const prevBtn = document.getElementById('prevDay');
+            if (prevDate) {
+                prevBtn.style.display = '';
+                prevBtn.href = `/news?date=${prevDate}`;
+            } else {
+                prevBtn.style.display = 'none';
+            }
+            // 今天
+            document.getElementById('todayDay').href = `/news?date=${today}`;
+            // 后一天
             const nextBtn = document.getElementById('nextDay');
-            
-            if (currentDate) {
-                const nextDate = addDays(currentDate, 1);
-                // 如果下一天是未来日期，禁用后一天按钮
-                nextBtn.disabled = nextDate > today;
+            if (nextDate && nextDate <= today) {
+                nextBtn.style.display = '';
+                nextBtn.href = `/news?date=${nextDate}`;
+                nextBtn.classList.remove('disabled');
+                nextBtn.style.pointerEvents = '';
+                nextBtn.style.opacity = '';
+            } else {
+                nextBtn.style.display = 'none';
             }
         }
 
@@ -527,7 +542,7 @@
         }
 
         function updateUpdateTime(date) {
-            document.getElementById('updateTime').textContent = `北京时间 8:00 更新`;
+            document.getElementById('updateTime').textContent = `数据日期：${date}（北京时间 8:00 更新）`;
             // 同时更新页面标题
             document.getElementById('pageTitle').textContent = `美股 ${date} 总结`;
         }
@@ -615,8 +630,43 @@
             document.getElementById('eventsList').innerHTML = errorHtml;
         }
 
+        // 显示数据提示信息
+        function showDataNotice(message) {
+            const noticeElement = document.getElementById('dataNotice');
+            const noticeText = document.getElementById('dataNoticeText');
+            noticeText.textContent = message;
+            noticeElement.style.display = 'flex';
+        }
+
+        // 隐藏数据提示信息
+        function hideDataNotice() {
+            const noticeElement = document.getElementById('dataNotice');
+            noticeElement.style.display = 'none';
+        }
+
+        // 获取URL参数
+        function getQueryParam(name) {
+            const url = new URL(window.location.href);
+            return url.searchParams.get(name);
+        }
+
         // 页面加载时获取数据
-        document.addEventListener('DOMContentLoaded', loadData);
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchAvailableDates();
+            const dateParam = getQueryParam('date');
+            let showDate = dateParam;
+            if (!dateParam) {
+                // 没有date参数，默认用最新的有数据日期
+                showDate = availableDates[availableDates.length - 1];
+            } else if (!availableDates.includes(dateParam)) {
+                showDate = findClosestAvailableDate(dateParam);
+            }
+            if (!showDate) {
+                showError('没有任何可用数据');
+                return;
+            }
+            loadDataForDate(showDate);
+        });
 
         // 截图功能
         async function captureScreenshot() {
@@ -645,17 +695,16 @@
                 // 移除截图模式样式类
                 document.body.classList.remove('screenshot-mode');
                 
-                // 创建下载链接
-                const link = document.createElement('a');
-                link.download = `美股${currentDate}总结.jpg`;
-                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                // 检测是否为移动设备
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                 
-                // 触发下载
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                console.log('截图已保存');
+                if (isMobile) {
+                    // 移动设备：尝试保存到相册
+                    await saveToPhotoLibrary(canvas);
+                } else {
+                    // 桌面设备：下载文件
+                    downloadImage(canvas);
+                }
                 
             } catch (error) {
                 console.error('截图失败:', error);
@@ -663,6 +712,51 @@
                 // 确保移除截图模式样式类
                 document.body.classList.remove('screenshot-mode');
             }
+        }
+
+        // 保存到相册（移动设备）
+        async function saveToPhotoLibrary(canvas) {
+            try {
+                // 将canvas转换为blob
+                const blob = await new Promise(resolve => {
+                    canvas.toBlob(resolve, 'image/jpeg', 0.9);
+                });
+
+                // 创建文件对象
+                const file = new File([blob], `美股${currentDate}总结.jpg`, { type: 'image/jpeg' });
+
+                // 检查是否支持Web Share API
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    // 使用Web Share API分享到相册
+                    await navigator.share({
+                        title: `美股${currentDate}总结`,
+                        text: '美股每日总结图片',
+                        files: [file]
+                    });
+                    alert('图片已分享，请选择保存到相册');
+                } else {
+                    // 回退到下载方式
+                    downloadImage(canvas);
+                }
+            } catch (error) {
+                console.error('保存到相册失败:', error);
+                // 回退到下载方式
+                downloadImage(canvas);
+            }
+        }
+
+        // 下载图片（桌面设备）
+        function downloadImage(canvas) {
+            const link = document.createElement('a');
+            link.download = `美股${currentDate}总结.jpg`;
+            link.href = canvas.toDataURL('image/jpeg', 0.9);
+            
+            // 触发下载
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            console.log('截图已保存');
         }
 
         // 每5分钟自动刷新当前日期的数据

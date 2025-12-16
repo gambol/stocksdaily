@@ -1,0 +1,46 @@
+{
+  "date": "2025-07-04",
+  "title": "今日AI职位机会",
+  "jobs": [
+    {
+      "company": "Woz",
+      "intro": "AI智能商业建设工具，帮助企业快速构建智能化业务系统。",
+      "address": "旧金山湾区/可远程工作"
+    },
+    {
+      "company": "Junction",
+      "intro": "设备连接实验室测试（原名Vital），专注于提供高效的硬件测试解决方案。",
+      "address": "可远程工作"
+    },
+    {
+      "company": "Neuralink",
+      "intro": "脑机接口技术公司，致力于开发可植入大脑的芯片技术。",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "OpenAI",
+      "intro": "人工智能研究公司，专注于开发安全的人工通用智能。",
+      "address": "旧金山湾区/可远程工作"
+    },
+    {
+      "company": "Anthropic",
+      "intro": "AI安全研究公司，开发有益、诚实、无害的AI系统。",
+      "address": "旧金山湾区"
+    },
+    {
+      "company": "Stability AI",
+      "intro": "生成式AI公司，专注于图像生成和AI模型开发。",
+      "address": "伦敦/可远程工作"
+    },
+    {
+      "company": "Midjourney",
+      "intro": "AI图像生成平台，通过自然语言描述创建高质量艺术作品。",
+      "address": "可远程工作"
+    },
+    {
+      "company": "Cohere",
+      "intro": "自然语言处理AI公司，为企业提供文本理解和生成能力。",
+      "address": "多伦多/可远程工作"
+    }
+  ]
+} 

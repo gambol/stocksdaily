@@ -8,6 +8,7 @@ https://www.perplexity.ai/
 
 再monica
 
+<<<<<<< HEAD
 对于这段文字`美股今日简报
 
 1. 指数表现
@@ -29,6 +30,7 @@ https://www.perplexity.ai/
 6月ADP就业人数减少3.3万，为2023年3月以来首次下降，市场对美国经济状况保持关注。
 
 特斯拉二季度交付量超预期，股价大涨，市值大增。`, 你把他严格按照我要的json格式, 进行輸出
+
 `{
   "date": "2024-12-30",
   "indices": [
@@ -45,7 +47,7 @@ https://www.perplexity.ai/
       "change": ""
     }
   ],
-  "marketAnalysis": [
+  "marketAnalysis": [  # 这个里面只有一句话
   ],
   "importantEvents": [
   ]
@@ -70,7 +72,6 @@ https://www.perplexity.ai/
   ],
   "marketAnalysis": [
     "标普500指数今日上涨<span class=\"highlight\">2.15%</span>，主要受益于科技和医疗保健板块的强劲表现。投资者对经济复苏的乐观情绪推动了大盘走高。",
-    "与此同时，纳斯达克指数下跌<span style=\"color: rgb(255, 59, 48); font-weight: 500;\">0.85%</span>，主要原因是几家大型科技公司财报不及预期，引发了投资者对科技股估值的担忧。"
   ],
   "importantEvents": [
     "美联储宣布维持当前利率不变，暗示年内可能进一步加息",
@@ -80,3 +81,23 @@ https://www.perplexity.ai/
     "英伟达发布新一代GPU芯片，股价创历史新高"
   ]
 } `
+
+
+
+
+
+## ai
+
+你是一个资深的AI 领域的编辑, 非常清楚用户的喜好.请你总结 AI 领域在今天的最新最重要的新闻.  输出的格式是`{
+  "date": "2025-07-04",
+  "key_news": [
+    {
+      "title": "",
+      "summary": "",
+    }
+  ]
+}` 一定要严格的按照我给的 json 格式输出.
+
+
+
+## 工作

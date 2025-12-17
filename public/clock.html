@@ -98,7 +98,9 @@
         let alarmTimeoutId = null;
         let audioCtx = null;
         let wakeLock = null;
-        let editingIndex = null; // 当前正在编辑的计时器索引，null表示添加模式 
+        let editingIndex = null; // 当前正在编辑的计时器索引，null表示添加模式
+        let lastScrolledIndex = null; // 上次滚动到的计时器索引
+        let scrollDebounceTimer = null; // 滚动防抖定时器 
 
         // 从本地存储加载
         function loadTimers() {
@@ -196,10 +198,19 @@
             const list = document.getElementById('timer-list');
             list.innerHTML = '';
 
-            timers.forEach((timer, index) => {
+            // 创建带原始索引的数组并排序（按剩余时间升序）
+            const sortedTimers = timers.map((timer, originalIndex) => ({
+                timer: timer,
+                originalIndex: originalIndex
+            })).sort((a, b) => a.timer.remaining - b.timer.remaining);
+
+            sortedTimers.forEach((item, displayIndex) => {
+                const timer = item.timer;
+                const originalIndex = item.originalIndex;
                 const percent = (timer.remaining / timer.duration) * 100;
                 
                 const div = document.createElement('div');
+                div.id = `timer-${originalIndex}`;
                 div.className = `bg-gray-800 rounded-lg p-4 border-l-4 relative overflow-hidden ${timer.isRunning ? 'border-green-500' : 'border-gray-600'}`;
                 
                 div.innerHTML = `
@@ -211,16 +222,16 @@
                             <div class="text-2xl font-mono text-gray-200">${formatTime(timer.remaining)}</div>
                         </div>
                         <div class="flex space-x-2">
-                            <button onclick="toggleTimer(${index})" class="w-10 h-10 rounded-full flex items-center justify-center ${timer.isRunning ? 'bg-yellow-600' : 'bg-green-600'}">
+                            <button onclick="toggleTimer(${originalIndex})" class="w-10 h-10 rounded-full flex items-center justify-center ${timer.isRunning ? 'bg-yellow-600' : 'bg-green-600'}">
                                 ${timer.isRunning ? '⏸' : '▶'}
                             </button>
-                            <button onclick="resetTimer(${index})" class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
+                            <button onclick="resetTimer(${originalIndex})" class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
                                 ↺
                             </button>
-                            <button onclick="editTimer(${index})" class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                            <button onclick="editTimer(${originalIndex})" class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
                                 ✎
                             </button>
-                            <button onclick="deleteTimer(${index})" class="w-10 h-10 rounded-full bg-red-900/50 text-red-500 flex items-center justify-center">
+                            <button onclick="deleteTimer(${originalIndex})" class="w-10 h-10 rounded-full bg-red-900/50 text-red-500 flex items-center justify-center">
                                 ✕
                             </button>
                         </div>
@@ -228,6 +239,58 @@
                 `;
                 list.appendChild(div);
             });
+
+            // 自动滚动到下一个需要timer的项目
+            scrollToNextTimer();
+        }
+
+        function scrollToNextTimer() {
+            // 清除之前的防抖定时器
+            if (scrollDebounceTimer) {
+                clearTimeout(scrollDebounceTimer);
+            }
+
+            // 使用防抖，避免过于频繁的滚动
+            scrollDebounceTimer = setTimeout(() => {
+                // 找到剩余时间最少且正在运行的计时器
+                let nextTimer = null;
+                let minRemaining = Infinity;
+                
+                timers.forEach((timer, index) => {
+                    if (timer.isRunning && timer.remaining > 0 && timer.remaining < minRemaining) {
+                        minRemaining = timer.remaining;
+                        nextTimer = { timer, index };
+                    }
+                });
+
+                // 如果没有正在运行的，找剩余时间最少的（无论是否运行）
+                if (!nextTimer) {
+                    timers.forEach((timer, index) => {
+                        if (timer.remaining > 0 && timer.remaining < minRemaining) {
+                            minRemaining = timer.remaining;
+                            nextTimer = { timer, index };
+                        }
+                    });
+                }
+
+                if (nextTimer) {
+                    // 只在目标改变时才滚动，避免重复滚动到同一个元素
+                    if (lastScrolledIndex !== nextTimer.index) {
+                        lastScrolledIndex = nextTimer.index;
+                        const element = document.getElementById(`timer-${nextTimer.index}`);
+                        if (element) {
+                            // 使用scrollIntoView将元素滚动到视口中心
+                            element.scrollIntoView({ 
+                                behavior: 'smooth', 
+                                block: 'center',
+                                inline: 'nearest'
+                            });
+                        }
+                    }
+                } else {
+                    lastScrolledIndex = null;
+                }
+            }, 300); // 300ms防抖延迟
         }
 
         function startGlobalLoop() {
@@ -288,6 +351,7 @@
                 });
             }
             
+            lastScrolledIndex = null; // 重置滚动状态，以便重新滚动到新目标
             saveTimers();
             renderTimers();
             closeModal();
@@ -299,6 +363,7 @@
             const timerName = timers[index].name;
             if(confirm(`要删除"${timerName}"这个定时器吗?`)) {
                 timers.splice(index, 1);
+                lastScrolledIndex = null; // 重置滚动状态，以便重新滚动到新目标
                 saveTimers();
                 renderTimers();
             }
@@ -308,6 +373,7 @@
             initAudio();
             requestWakeLock();
             timers[index].isRunning = !timers[index].isRunning;
+            lastScrolledIndex = null; // 重置滚动状态
             saveTimers();
             renderTimers();
         }
@@ -315,6 +381,7 @@
         function resetTimer(index) {
             timers[index].isRunning = false;
             timers[index].remaining = timers[index].duration;
+            lastScrolledIndex = null; // 重置滚动状态
             saveTimers();
             renderTimers();
         }
@@ -329,6 +396,7 @@
                     t.isRunning = false;
                 }
             });
+            lastScrolledIndex = null; // 重置滚动状态
             saveTimers();
             renderTimers();
         }
@@ -341,6 +409,7 @@
                     t.isRunning = false;
                     t.remaining = t.duration;
                 });
+                lastScrolledIndex = null; // 重置滚动状态
                 saveTimers();
                 renderTimers();
             }

@@ -36,6 +36,10 @@
                     <span id="wake-lock-text">点击屏幕激活常亮</span>
                 </div>
             </div>
+            <div id="start-time-display" class="hidden text-right">
+                <div class="text-xs text-gray-400">开始时间</div>
+                <div id="start-time-text" class="text-sm font-mono text-green-400"></div>
+            </div>
         </div>
         
         <!-- 按钮组 (分两行或一行取决于屏幕宽度，这里用flex-wrap) -->
@@ -100,7 +104,8 @@
         let wakeLock = null;
         let editingIndex = null; // 当前正在编辑的计时器索引，null表示添加模式
         let lastScrolledIndex = null; // 上次滚动到的计时器索引
-        let scrollDebounceTimer = null; // 滚动防抖定时器 
+        let scrollDebounceTimer = null; // 滚动防抖定时器
+        let startTime = null; // 全开时的开始时间 
 
         // 从本地存储加载
         function loadTimers() {
@@ -192,6 +197,34 @@
             const m = Math.floor(seconds / 60).toString().padStart(2, '0');
             const s = (seconds % 60).toString().padStart(2, '0');
             return `${m}:${s}`;
+        }
+
+        function formatDateTime(date) {
+            const h = date.getHours().toString().padStart(2, '0');
+            const m = date.getMinutes().toString().padStart(2, '0');
+            const s = date.getSeconds().toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        function updateStartTimeDisplay() {
+            const display = document.getElementById('start-time-display');
+            const text = document.getElementById('start-time-text');
+            
+            if (startTime) {
+                display.classList.remove('hidden');
+                text.textContent = formatDateTime(startTime);
+            } else {
+                display.classList.add('hidden');
+            }
+        }
+
+        function checkAndUpdateStartTime() {
+            // 检查是否所有计时器都已停止
+            const allStopped = timers.every(t => !t.isRunning);
+            if (allStopped && startTime) {
+                startTime = null;
+                updateStartTimeDisplay();
+            }
         }
 
         function renderTimers() {
@@ -311,6 +344,7 @@
                 });
 
                 if (needsRender) {
+                    checkAndUpdateStartTime(); // 检查并更新开始时间显示
                     renderTimers();
                     saveTimers(); 
                 }
@@ -363,6 +397,7 @@
             const timerName = timers[index].name;
             if(confirm(`要删除"${timerName}"这个定时器吗?`)) {
                 timers.splice(index, 1);
+                checkAndUpdateStartTime(); // 检查并更新开始时间显示
                 lastScrolledIndex = null; // 重置滚动状态，以便重新滚动到新目标
                 saveTimers();
                 renderTimers();
@@ -373,6 +408,7 @@
             initAudio();
             requestWakeLock();
             timers[index].isRunning = !timers[index].isRunning;
+            checkAndUpdateStartTime(); // 检查并更新开始时间显示
             lastScrolledIndex = null; // 重置滚动状态
             saveTimers();
             renderTimers();
@@ -381,6 +417,7 @@
         function resetTimer(index) {
             timers[index].isRunning = false;
             timers[index].remaining = timers[index].duration;
+            checkAndUpdateStartTime(); // 检查并更新开始时间显示
             lastScrolledIndex = null; // 重置滚动状态
             saveTimers();
             renderTimers();
@@ -389,6 +426,23 @@
         function toggleAll(shouldStart) {
             initAudio();
             requestWakeLock();
+            
+            if (shouldStart) {
+                // 检查是否有计时器可以启动
+                const hasRunnableTimers = timers.some(t => t.remaining > 0);
+                if (hasRunnableTimers) {
+                    startTime = new Date(); // 记录开始时间
+                    updateStartTimeDisplay();
+                }
+            } else {
+                // 检查是否所有计时器都已停止
+                const allStopped = timers.every(t => !t.isRunning);
+                if (allStopped) {
+                    startTime = null; // 清除开始时间
+                    updateStartTimeDisplay();
+                }
+            }
+            
             timers.forEach(t => {
                 if (shouldStart && t.remaining > 0) {
                     t.isRunning = true;
@@ -396,6 +450,9 @@
                     t.isRunning = false;
                 }
             });
+            
+            checkAndUpdateStartTime(); // 检查并更新开始时间显示
+            
             lastScrolledIndex = null; // 重置滚动状态
             saveTimers();
             renderTimers();
@@ -409,6 +466,8 @@
                     t.isRunning = false;
                     t.remaining = t.duration;
                 });
+                startTime = null; // 清除开始时间
+                updateStartTimeDisplay();
                 lastScrolledIndex = null; // 重置滚动状态
                 saveTimers();
                 renderTimers();

@@ -183,12 +183,12 @@
             oscillator.type = 'square';
             oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); 
             oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime); // 降低音量从0.5到0.2
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); // 缩短持续时间从0.5到0.3
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.5);
+            oscillator.stop(audioCtx.currentTime + 0.3); // 缩短持续时间从0.5到0.3
         }
 
         // --- 核心逻辑 ---
@@ -480,7 +480,16 @@
             const overlay = document.getElementById('alarm-overlay');
             const text = document.getElementById('alarm-text');
             
-            text.innerText = `${timer.name} 时间到!`;
+            // 计算从开始时间到现在经过了多少分钟
+            let minuteText = '';
+            if (startTime) {
+                const now = new Date();
+                const diffMs = now - startTime;
+                const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                minuteText = `现在是第${diffMinutes}分钟, `;
+            }
+            
+            text.innerText = `${minuteText}${timer.name} 时间到!`;
             overlay.classList.remove('hidden');
             overlay.classList.add('alarm-active'); 
             
@@ -488,8 +497,8 @@
             const beepInterval = setInterval(() => {
                 playBeep();
                 beepCount++;
-                if(beepCount > 5) clearInterval(beepInterval);
-            }, 800);
+                if(beepCount > 2) clearInterval(beepInterval); // 减少播放次数从5次到2次（总共3次）
+            }, 500); // 缩短间隔时间从800ms到500ms
             playBeep(); 
 
             if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500]);

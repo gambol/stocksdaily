@@ -36,9 +36,15 @@
                     <span id="wake-lock-text">点击屏幕激活常亮</span>
                 </div>
             </div>
-            <div id="start-time-display" class="hidden text-right">
-                <div class="text-xs text-gray-400">开始时间</div>
-                <div id="start-time-text" class="text-sm font-mono text-green-400"></div>
+            <div class="text-right">
+                <div id="start-time-display" class="hidden">
+                    <div class="text-xs text-gray-400">开始时间</div>
+                    <div id="start-time-text" class="text-sm font-mono text-green-400"></div>
+                </div>
+                <div id="elapsed-time-display" class="hidden mt-2">
+                    <div class="text-xs text-gray-400">已用时间</div>
+                    <div id="elapsed-time-text" class="text-lg font-mono font-bold text-yellow-400"></div>
+                </div>
             </div>
         </div>
         
@@ -218,12 +224,36 @@
             }
         }
 
+        function updateElapsedTimeDisplay() {
+            const display = document.getElementById('elapsed-time-display');
+            const text = document.getElementById('elapsed-time-text');
+            
+            if (startTime) {
+                const now = new Date();
+                const diffMs = now - startTime;
+                const totalSeconds = Math.floor(diffMs / 1000);
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                
+                if (hours > 0) {
+                    text.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                } else {
+                    text.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+                display.classList.remove('hidden');
+            } else {
+                display.classList.add('hidden');
+            }
+        }
+
         function checkAndUpdateStartTime() {
             // 检查是否所有计时器都已停止
             const allStopped = timers.every(t => !t.isRunning);
             if (allStopped && startTime) {
                 startTime = null;
                 updateStartTimeDisplay();
+                updateElapsedTimeDisplay();
             }
         }
 
@@ -343,6 +373,9 @@
                     }
                 });
 
+                // 更新已用时间显示（每秒更新）
+                updateElapsedTimeDisplay();
+
                 if (needsRender) {
                     checkAndUpdateStartTime(); // 检查并更新开始时间显示
                     renderTimers();
@@ -433,6 +466,7 @@
                 if (hasRunnableTimers) {
                     startTime = new Date(); // 记录开始时间
                     updateStartTimeDisplay();
+                    updateElapsedTimeDisplay();
                 }
             } else {
                 // 检查是否所有计时器都已停止
@@ -440,6 +474,7 @@
                 if (allStopped) {
                     startTime = null; // 清除开始时间
                     updateStartTimeDisplay();
+                    updateElapsedTimeDisplay();
                 }
             }
             
@@ -468,6 +503,7 @@
                 });
                 startTime = null; // 清除开始时间
                 updateStartTimeDisplay();
+                updateElapsedTimeDisplay();
                 lastScrolledIndex = null; // 重置滚动状态
                 saveTimers();
                 renderTimers();
@@ -545,6 +581,7 @@
         }
 
         loadTimers();
+        updateElapsedTimeDisplay(); // 初始化已用时间显示
         startGlobalLoop();
 
     </script>
